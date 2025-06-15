@@ -3,8 +3,8 @@
 // morph the player into the shape of the arc?
 
 
-const WIDTH = 800;
-const HEIGHT = 400;
+const WIDTH = 300;
+const HEIGHT = 300;
 
 let player_tilt_up = 0
 let player_tilt_down = 0
@@ -20,7 +20,7 @@ let bullet_queued = false
 let bullet_speed = 10
 
 let camera_x = 0
-let camera_player_offset = WIDTH / 2
+let camera_player_offset = WIDTH / 6
 
 class Bullet {
   constructor(pos, dir, vel) {

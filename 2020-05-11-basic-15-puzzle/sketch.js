@@ -1,0 +1,20 @@
+// A basic 15-puzzle
+// Some less-basic spinoff ideas:
+//   - convert an image into a puzzle
+//   - import an image, and have it auto-shuffle in 
+//     front of you. Novel image corruption effect
+
+let canvasW = 600;
+let canvasH = 600;
+let board;
+
+function setup() {
+  createCanvas(canvasW, canvasH);
+  board = new Board();
+}
+
+function draw() {
+  background(0);
+	board.draw();
+	board.checkWin();
+}

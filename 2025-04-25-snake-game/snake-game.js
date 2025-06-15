@@ -11,9 +11,9 @@ Snake
 // https://github.com/alterebro/p5.fillGradient
 "use strict";p5.prototype.fillGradient=function(){let o=0<arguments.length&&void 0!==arguments[0]?arguments[0]:"linear";var t=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{};let r=2<arguments.length&&void 0!==arguments[2]&&arguments[2];var e={linear:{from:[0,0],to:[width,height],steps:[color(255),color(0,96,164),color(0)]},radial:{from:[width/2,height/2,0],to:[width/2,height/2,max(width/2,height/2)],steps:[color(255),color(0,96,164),color(0)]},conic:{from:[width/2,height/2,90],steps:[color(255),color(0,96,164),color(0)]}};let a=o.toLowerCase(),i=(a=e[a]?a:"linear",Object.assign(e[a],t)),l=(r?r.canvas:canvas).getContext("2d"),n={linear:()=>l.createLinearGradient(i.from[0],i.from[1],i.to[0],i.to[1]),radial:()=>l.createRadialGradient(i.from[0],i.from[1],i.from[2],i.to[0],i.to[1],i.to[2]),conic:()=>l.createConicGradient(radians(i.from[2]),i.from[0],i.from[1])},c=n[a]();i.steps.forEach((o,t)=>{o=Array.isArray(o)?o:[o],t=o[1]||t/(i.steps.length-1),t=Math.min(1,Math.max(0,t));c.addColorStop(t,o[0])}),l.fillStyle=c};
 
-const canvasW = 475
-const canvasH = 425
-const scoreBarH = 25
+const canvasW = 300
+const canvasH = 280
+const scoreBarH = 20
 
 const speed = 25 // pixels per 60 frames (60 frames = 1 second)
 let millisOffset = 0
@@ -136,7 +136,7 @@ function drawScoreBar() {
   fill(scoreBarColor)
   rect(0, canvasH, canvasW, canvasH + scoreBarH)
   fill(scoreTextColor)
-  textSize(scoreBarH)
+  textSize(scoreBarH * .8)
   textAlign(LEFT, CENTER)
   text(`SCORE:${score}`, 5, canvasH + scoreBarH/2)
   textAlign(RIGHT, CENTER)

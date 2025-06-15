@@ -19,15 +19,50 @@
       background-size: cover;
     }
     main {
-      columns: 3;
+      columns: 1;
       column-gap: 10px;
       position: relative;
-      width: 100%;
+      width: calc(300px + 10px); /* 1 column + gap (mobile default) */
+      max-width: 100%; /* Ensure it doesn't overflow on small screens */
+      margin: 0 auto; /* Center horizontally */
       height: auto;
     }
     iframe {
-      width: 500px;
-      height: 300px
+      width: 300px;
+      height: 300px;
+      border: none;
+      overflow: hidden;
+      break-inside: avoid;
+      margin-bottom: 10px;
+    }
+    /* For modern browsers */
+iframe[scrolling="no"] {
+  overflow: hidden;
+}
+
+    @media (min-width: 600px) {
+      main {
+        columns: 2;
+        width: calc(300px * 2 + 10px); /* 2 columns + 1 gap */
+      }
+    }
+    @media (min-width: 900px) {
+      main {
+        columns: 3;
+        width: calc(300px * 3 + 10px * 2); /* 3 columns + 2 gaps */
+      }
+    }
+    @media (min-width: 1200px) {
+      main {
+        columns: 4;
+        width: calc(300px * 4 + 10px * 3); /* 4 columns + 3 gaps */
+      }
+    }
+    @media (min-width: 1500px) {
+      main {
+        columns: 5;
+        width: calc(300px * 5 + 10px * 4); /* 5 columns + 4 gaps */
+      }
     }
   </style>
 
@@ -35,15 +70,16 @@
 
 <body>
   <main>
-    <iframe src="2020-05-11-basic-15-puzzle/index.html" style="height: 600px"></iframe>
-    <iframe src="2025-03-21-space-clock/index.html" style="height: 640px"></iframe>
-    <iframe src="2025-04-25-snake-game/index.html" style="height: 425px"></iframe> 
-    <iframe src="2025-04-30-marble-glow-game/index.html"></iframe>
-    <iframe src="2025-04-28-board-game-randomizer/index.html"></iframe>
-    <iframe src="2025-06-02-dice-game/index.html"></iframe>
+    <iframe src="2014-00-00-glider" style="height: 300px"></iframe>
     <iframe src="2020-05-01-snake-man-slider/index.html" style="height: 340px"></iframe>
-
-    The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. 
+    <iframe src="2020-05-11-breakout" style="height: 300px"></iframe>
+    <iframe src="2020-05-11-basic-15-puzzle/index.html" style="height: 300px"></iframe>
+    <iframe src="2025-03-21-space-clock/index.html" style="height: 534px"></iframe>
+    <iframe src="2025-04-21 emoji-tile-game" style="height: 300px"></iframe>
+    <iframe src="2025-04-25-snake-game/index.html" style="height: 300px"></iframe> 
+    <iframe src="2025-04-28-board-game-randomizer/index.html"></iframe>
+    <iframe src="2025-04-30-marble-glow-game/index.html"></iframe>
+    <iframe src="2025-06-02-dice-game/index.html"></iframe>
 
   </main>
 </body>

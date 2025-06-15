@@ -1,5 +1,5 @@
-const WIDTH = 600;
-const HEIGHT = 650;
+const WIDTH = 300;
+const HEIGHT = 300;
 
 function setup() {
   createCanvas(WIDTH, HEIGHT);

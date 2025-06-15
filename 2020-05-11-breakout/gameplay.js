@@ -1,12 +1,12 @@
 class Gameplay {
   constructor(){
-    this.ball = new Ball(width / 2, height /4);
+    this.ball = new Ball(WIDTH / 2, height /4);
     this.paddle = new Paddle();
     this.bars = [];
     // The following could be done with a list of coordinates
     for (let i = 0 ; i < 4 ; i++) {
-      for (let j = 0 ; j < 5 ; j++) {
-        this.bars.push(new Bar(10 + i*width / 4, 10 + j*100))
+      for (let j = 0 ; j < 6 ; j++) {
+        this.bars.push(new Bar(10 + i*WIDTH / 4, 10 + j*30))
       }
     }
   }
@@ -79,10 +79,10 @@ class Ball {
   constructor(x, y){
     this.x = x
     this.y = y
-    this.vx = 4
-    this.vy = 4
-    this.w = 8 //width
-    this.h = 8 //height
+    this.vx = 2
+    this.vy = 2
+    this.w = 12 //width
+    this.h = 12 //height
   }
   
   update() {
@@ -125,8 +125,8 @@ class Ball {
 
 class Paddle {
   constructor() {
-    this.w = 100;
-    this.h = 20;
+    this.w = 50;
+    this.h = 10;
     this.x = width / 2 - this.w / 2
     this.y = height - 30
     this.v = 0
@@ -163,8 +163,8 @@ class Bar {
   constructor(x, y) {
     this.x = x
     this.y = y    
-    this.w = 100;
-    this.h = 60;
+    this.w = 60;
+    this.h = 20;
     this.isHit = false;
   }
   draw() {
