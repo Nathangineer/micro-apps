@@ -1,3 +1,5 @@
+// (elastomania unicycle)
+
 'use strict'
 
 const WIDTH = 600;

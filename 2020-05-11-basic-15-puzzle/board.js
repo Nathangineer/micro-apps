@@ -84,7 +84,7 @@ class Board{
 	}
 
 	draw(){
-		let tileSize = width / this.tileArr.length;
+		let tileSize = canvasW / this.tileArr.length;
 		textAlign(CENTER, CENTER);
 		textSize(tileSize / 2);
 		rectMode(CENTER);

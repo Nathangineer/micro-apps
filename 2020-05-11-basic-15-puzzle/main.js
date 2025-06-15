@@ -4,12 +4,12 @@
 //   - import an image, and have it auto-shuffle in 
 //     front of you. Novel image corruption effect
 
-const WIDTH = 600;
-const HEIGHT = 600;
+let canvasW = 600;
+let canvasH = 600;
 let board;
 
 function setup() {
-  createCanvas(WIDTH, HEIGHT);
+  createCanvas(canvasW, canvas);
   board = new Board();
 }
 

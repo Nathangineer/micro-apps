@@ -204,14 +204,14 @@ function draw() {
 HI: 🐍 ${score+3}  🍎 ${score}  ↔️ ${turns}  ⬆️ ${noTurns}  👟 ${moves}`, 0, HEIGHT+GUI_HEIGHT/4, WIDTH)
 
   if (game_state == 0) {
-    text("Get moving!", WIDTH/2, HEIGHT/2)
+    text("I'm hungry!", WIDTH/2, HEIGHT/2)
     if (input_received == true) {
       input_received = false
       game_state = 1
     }
   }
   if (game_state == 1) {
-    	let eaten = snake.isAppleEdible(apple)
+    let eaten = snake.isAppleEdible(apple)
     apple.move(eaten)
     apple.draw()  
     snake.checkCollision()
@@ -220,10 +220,10 @@ HI: 🐍 ${score+3}  🍎 ${score}  ↔️ ${turns}  ⬆️ ${noTurns}  👟 ${m
   }  
   if (snake.alive == false){
     //game_state = 2
-    text("dead", WIDTH/2, HEIGHT/2)
-    this = `Your turned left 25% more than right. You moved an average of x spaces between apples.
-    You turned on 70% of moves, instead of moving forward. You rotated this many degrees CW: 1080,
-    which is 23 rotations.`
+    text("Ouch", WIDTH/2, HEIGHT/2)
+    // = `Your turned left 25% more than right. You moved an average of x spaces between apples.
+    //You turned on 70% of moves, instead of moving forward. You rotated this many degrees CW: 1080,
+    //which is 23 rotations.`
   }
     snake.draw()
 
