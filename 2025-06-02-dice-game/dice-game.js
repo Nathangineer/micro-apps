@@ -73,8 +73,20 @@ let canvasH = 300
 let bgColor = "#FFF"
 let lineWeight = 1
 let game = {state: 0}
+
 let dice = [false, false, false, false, false]
 let scores = []
+let scoreTopSubtotal
+let scoreTopBonus
+let scoreTopTotal
+let yahtzeeCounter
+let scoreLowerTotal
+let scoreGrandTotal
+
+let gameStates = ["CLICK TO START", "ROLLS"]
+let gameState = gameStates[0] 
+let rollTryCounter = 0
+let rollTryMax = 3
 
 const BUTTON_W = 45
 const BUTTON_H = 45
@@ -86,28 +98,41 @@ class Dice {
     this.w = BUTTON_W
     this.h = BUTTON_H
     this.value = 0
-    this.active = true
+    this.active = false
     this.locked = false
+    this.angle = 0
   }
   show(){
+    push()
+    translate(this.x, this.y)
+    rotate(this.angle)
     if (this.active) {
       let textFill = this.locked ? "#F00" : "#00F"
       let diceFill = this.locked ? "#CCC" : "#FFF"
       strokeWeight(3); fill(diceFill); stroke(0)
-      rect(this.x, this.y, this.w, this.h, 6)
-      
+      rect(0, 0, this.w, this.h, 6)
       let label = this.value === 0 ? "" : this.value 
       noStroke(); fill(textFill)
       textSize(45); textAlign(CENTER, CENTER)
-      text(label, this.x + this.w/2, this.y + this.h/2)
+      //text(label, this.w/2, this.h/2)
       if (this.locked) {
         stroke(0)
         textSize(22)
-        text("🔒", this.x + 8, this.y + this.h)
+        text("🔒", 8, this.h)
         textSize(12)
-        text("🎲", this.x + 8, this.y + this.h + 4)
+        text("🎲", 8, this.h + 4)
       }
+      //dots
+      fill(0)
+      if ([4,5,6].includes(this.value)) circle(10, 10, 9) // NW
+      if ([6].includes(this.value)) circle(10, 22.5, 9) // W
+      if ([2,3,4,5,6].includes(this.value)) circle(10, 35, 9) // SW
+      if ([1,3,5].includes(this.value)) circle(22.5, 22.5, 9) // MID
+      if ([2,3,4,5,6].includes(this.value)) circle(35, 10, 9) // NE
+      if ([6].includes(this.value)) circle(35, 22.5, 9) // E
+      if ([4,5,6].includes(this.value)) circle(35, 35, 9) // SE
     }
+    pop()
   }
   click(x, y){
     if (this.active) {
@@ -116,10 +141,13 @@ class Dice {
         this.locked = !this.locked
       }
     }
+    if (this.locked) this.angle = 0
   }
   roll() {
     if (!this.locked) {
       this.value = Math.floor((Math.random() * 6)) + 1
+      this.angle = (Math.random() - 0.5) / 3
+      this.active = true
     }
   }
 }
@@ -148,31 +176,41 @@ class RollButton {
         }
     }
 }
-
 class ScoreButton {
     constructor(x, y, name, callback){
         this.x = x
         this.y = y
         this.w = BUTTON_W
         this.h = BUTTON_H
-        this.text = name
+        this.scoreName = name
         this.callback = callback
         this.active = true
         this.score = null
     }
     show(){
-        stroke(0); fill(255)
-        rect(this.x, this.y, this.w, this.h, 10)
-        fill("#000"); noStroke()
-        textSize(12); textAlign(CENTER, BOTTOM)
-        text(this.text, this.x+this.w/2, this.y+this.h/1.5)
-        // Show this.score
+        let textColor = "#000000"
+        let diceColor = "#FFFFFF"
+        let scoreValue // For either potential or actual score
         if (this.score != null) {
-            text(this.score, this.x+this.w/2, this.y+this.h)
-        } else { // Or show potential score if this.score is null
-            fill(128)
-            text(this.scoreDice(), this.x+this.w/2, this.y+this.h)
+            textColor = "#000077" //noStroke()
+            diceColor = "#CCCCFF"
+            scoreValue = this.score
+        } else {
+            scoreValue = this.scoreDice()
+            if (scoreValue != 0) {
+              textColor = "#404000"
+              diceColor = "#FFFF66"
+            } else {
+              textColor = "#000000"
+              diceColor = "#FFFFFF"
+            }
         }
+        fill(diceColor); stroke(textColor)
+        rect(this.x, this.y, this.w, this.h, 10)
+        
+        fill(textColor); textSize(12); textAlign(CENTER, BOTTOM); noStroke();
+        text(this.scoreName, this.x+this.w/2, this.y+this.h/1.5)
+        text(scoreValue, this.x+this.w/2, this.y+this.h-2)
     }
     click(x, y){
         if (x > this.x && x < this.x + this.w && 
@@ -198,7 +236,7 @@ class ScoreButton {
 
 function setup() {
   for (i = 0; i < 5; i++){
-    dice[i] = new Dice(54*i+10, 50)
+    dice[i] = new Dice(59*i+10, 10)
   }
   rollButton = new RollButton(50, 110)
   
@@ -210,30 +248,24 @@ function setup() {
   scores.push(new ScoreButton(210, 160, "Fives", (counts, diceTotal) => 5 * counts[4]))
   scores.push(new ScoreButton(260, 160, "Sixes", (counts, diceTotal) => 6 * counts[5]))
   
-      
-      // score.upperSubTotal
-      // score.bonus if 63 or more, give 35 points
-      // score.upperTotal = score.upperSubTotal + score.bonus
-      
-      // "LOWER SECTION"
-      //score.threeOfAKind = counts.match(/{3-5}/) ? total : 0
-      //score.fourOfAKind =  counts.match(/{4-5}/) ? total : 0
-  scores.push(new ScoreButton(10, 220, "3 of a\nkind", (counts, total) => total))
-  scores.push(new ScoreButton(60, 220, "4 of a\nkind", (counts, total) => total))
+
+  // score.upperSubTotal
+  // score.bonus if 63 or more, give 35 points
+  // score.upperTotal = score.upperSubTotal + score.bonus
+  
+  // "LOWER SECTION"
+  scores.push(new ScoreButton(10, 220, "3 of a\nkind", (counts, total) => counts.match(/3|4|5/) ? total : 0))
+  scores.push(new ScoreButton(60, 220, "4 of a\nkind", (counts, total) =>  counts.match(/4|5/) ? total : 0))
   scores.push(new ScoreButton(110, 220, "Full\nHouse", (counts, total) => counts.match(/20*3|30*2/) ? 25 : 0))
   scores.push(new ScoreButton(160, 220, "Small\nStraight", (counts, total) => counts.match(/[12]{4}/) ? 30 : 0))
   scores.push(new ScoreButton(210, 220, "Large\nStraight", (counts, total) => counts.match(/1{4}/) ? 40 : 0))
   scores.push(new ScoreButton(260, 220, "Yahtzee", (counts, total) => counts.match(/5/) ? 50 : 0))
   scores.push(new ScoreButton(260, 110, "Chance", (counts, total) => total))
 
-      //score.smallStraight = counts.match(/[12]{4}/) ? 30 : 0
-      //score.largeStraight = counts.match(/1{4}/) ? 40 : 0
-      //score.yahtzee = counts.match(/5/) ? 50 : 0
-      //score.chance = total
-      //score.yahtzeeBonusCounter
-      //score.yahtzeeBonus = 100 * score.yahtzeeBonusCounter 
-      // score.lowerTotal
-      // score.grandtotal
+  // score.yahtzeeBonusCounter
+  // score.yahtzeeBonus = 100 * score.yahtzeeBonusCounter 
+  // score.lowerTotal
+  // score.grandtotal
    
   textOutput()
   createCanvas(canvasW, canvasH)
