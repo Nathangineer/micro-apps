@@ -77,19 +77,21 @@ let game = {state: 0}
 let dice = [false, false, false, false, false]
 let scores = []
 let scoreTopSubtotal
-let scoreTopBonus
+let scoreTopBonus = 0
 let scoreTopTotal
 let yahtzeeCounter
 let scoreLowerTotal
 let scoreGrandTotal
 
-let gameStates = ["CLICK TO START", "ROLLS"]
+let gameStates = ["CLICK TO START", "ROLL1", "ROLL2", "MUST_SCORE", "END"]
 let gameState = gameStates[0] 
-let rollTryCounter = 0
+let rollTryCounter = 1
 let rollTryMax = 3
 
 const BUTTON_W = 45
 const BUTTON_H = 45
+const DOT_DIST = 12.5
+const DOT_SIZE = 9
 
 class Dice {
   constructor(x, y, value = false){
@@ -110,34 +112,32 @@ class Dice {
       let textFill = this.locked ? "#F00" : "#00F"
       let diceFill = this.locked ? "#CCC" : "#FFF"
       strokeWeight(3); fill(diceFill); stroke(0)
+      rectMode(CENTER, CENTER)
       rect(0, 0, this.w, this.h, 6)
-      let label = this.value === 0 ? "" : this.value 
-      noStroke(); fill(textFill)
-      textSize(45); textAlign(CENTER, CENTER)
-      //text(label, this.w/2, this.h/2)
+
+      fill(0); noStroke();
+      if ([4,5,6].includes(this.value)) circle(-DOT_DIST, -DOT_DIST, DOT_SIZE) // NW
+      if ([6].includes(this.value)) circle(-DOT_DIST, 0, DOT_SIZE) // W
+      if ([2,3,4,5,6].includes(this.value)) circle(-DOT_DIST, DOT_DIST, DOT_SIZE) // SW
+      if ([1,3,5].includes(this.value)) circle(0, 0, DOT_SIZE) // MID
+      if ([2,3,4,5,6].includes(this.value)) circle(DOT_DIST, -DOT_DIST, DOT_SIZE) // NE
+      if ([6].includes(this.value)) circle(DOT_DIST, 0, DOT_SIZE) // E
+      if ([4,5,6].includes(this.value)) circle(DOT_DIST, DOT_DIST, DOT_SIZE) // SE
       if (this.locked) {
         stroke(0)
         textSize(22)
-        text("🔒", 8, this.h)
+        text("🔒", 1, this.h / 2)
         textSize(12)
-        text("🎲", 8, this.h + 4)
+        text("🎲", 1, this.h / 2)
       }
       //dots
-      fill(0)
-      if ([4,5,6].includes(this.value)) circle(10, 10, 9) // NW
-      if ([6].includes(this.value)) circle(10, 22.5, 9) // W
-      if ([2,3,4,5,6].includes(this.value)) circle(10, 35, 9) // SW
-      if ([1,3,5].includes(this.value)) circle(22.5, 22.5, 9) // MID
-      if ([2,3,4,5,6].includes(this.value)) circle(35, 10, 9) // NE
-      if ([6].includes(this.value)) circle(35, 22.5, 9) // E
-      if ([4,5,6].includes(this.value)) circle(35, 35, 9) // SE
     }
     pop()
   }
   click(x, y){
     if (this.active) {
-      if (x > this.x && y > this.y && 
-          x < this.x + this.w && y < this.y + this.h) {
+      if (x > this.x - this.w / 2 && y > this.y - this.h / 2 && 
+          x < this.x + this.w / 2 && y < this.y + this.h / 2) {
         this.locked = !this.locked
       }
     }
@@ -146,9 +146,14 @@ class Dice {
   roll() {
     if (!this.locked) {
       this.value = Math.floor((Math.random() * 6)) + 1
-      this.angle = (Math.random() - 0.5) / 3
+      this.angle = (Math.random() - 0.5)
+      if (Math.random() > 0.5) this.angle += PI / 2
       this.active = true
     }
+  }
+  reset() {
+      this.value = 0
+      this.active = true
   }
 }
 
@@ -156,7 +161,7 @@ class RollButton {
     constructor(x, y){
         this.x = x
         this.y = y
-        this.w = BUTTON_W*3
+        this.w = BUTTON_W*6
         this.h = BUTTON_H
         this.text = "ROLL"
         this.active = true
@@ -165,14 +170,25 @@ class RollButton {
         stroke(0); fill(255)
         rect(this.x, this.y, this.w, this.h, 20)
         fill("#000"); noStroke()
-        textSize(35); textAlign(CENTER, CENTER)
-        text(this.text, this.x+this.w/2, this.y+this.h/2)
+        textSize(30); textAlign(CENTER, CENTER)
+        if (rollTryCounter === 1) {
+          this.text = "ROLL"
+        } else if (rollTryCounter === 2) {
+          this.text = "ROLL or SCORE"
+        } else {
+          this.text = "SCORE"
+        }
+          text(this.text, this.x+this.w/2, this.y+this.h/2)
     }
     click(x, y){
         if (x > this.x && y > this.y && 
           x < this.x + this.w && y < this.y + this.h) {
-            dice.forEach(d => d.roll())
-            console.log("roll")
+            if (rollTryCounter <= rollTryMax) {
+              dice.forEach(d => d.roll())
+              rollTryCounter++
+              console.log("roll")
+            }
+            
         }
     }
 }
@@ -215,9 +231,13 @@ class ScoreButton {
     click(x, y){
         if (x > this.x && x < this.x + this.w && 
             y > this.y && y < this.y + this.h ) {
-                if (this.score === null) {
+                if (this.score === null && rollTryCounter > 1) {
                     this.score = this.scoreDice()
                     console.log("score saved")
+                    rollTryCounter = 1   
+                    dice.forEach(d => d.reset())
+                    dice.forEach(d => d.active = false)
+                    dice.forEach(d => d.locked = false)
                 }
         }
     }
@@ -236,32 +256,30 @@ class ScoreButton {
 
 function setup() {
   for (i = 0; i < 5; i++){
-    dice[i] = new Dice(59*i+10, 10)
+    dice[i] = new Dice(59*i+30, 85)
   }
-  rollButton = new RollButton(50, 110)
+  rollButton = new RollButton(10, 10)
   
   // "UPPER SECTION"
-  scores.push(new ScoreButton(10, 160, "Ones", (counts, diceTotal) => 1 * counts[0]))  
-  scores.push(new ScoreButton(60, 160, "Twos", (counts, diceTotal) => 2 * counts[1]))
-  scores.push(new ScoreButton(110, 160, "Threes", (counts, diceTotal) => 3 * counts[2]))
-  scores.push(new ScoreButton(160, 160, "Fours", (counts, diceTotal) => 4 * counts[3]))
-  scores.push(new ScoreButton(210, 160, "Fives", (counts, diceTotal) => 5 * counts[4]))
-  scores.push(new ScoreButton(260, 160, "Sixes", (counts, diceTotal) => 6 * counts[5]))
+  scores.push(new ScoreButton(10, 120, "Ones", (counts, diceTotal) => 1 * counts[0]))  
+  scores.push(new ScoreButton(60, 120, "Twos", (counts, diceTotal) => 2 * counts[1]))
+  scores.push(new ScoreButton(10, 170, "Threes", (counts, diceTotal) => 3 * counts[2]))
+  scores.push(new ScoreButton(60, 170, "Fours", (counts, diceTotal) => 4 * counts[3]))
+  scores.push(new ScoreButton(10, 220, "Fives", (counts, diceTotal) => 5 * counts[4]))
+  scores.push(new ScoreButton(60, 220, "Sixes", (counts, diceTotal) => 6 * counts[5]))
   
-
   // score.upperSubTotal
   // score.bonus if 63 or more, give 35 points
   // score.upperTotal = score.upperSubTotal + score.bonus
   
   // "LOWER SECTION"
-  scores.push(new ScoreButton(10, 220, "3 of a\nkind", (counts, total) => counts.match(/3|4|5/) ? total : 0))
-  scores.push(new ScoreButton(60, 220, "4 of a\nkind", (counts, total) =>  counts.match(/4|5/) ? total : 0))
-  scores.push(new ScoreButton(110, 220, "Full\nHouse", (counts, total) => counts.match(/20*3|30*2/) ? 25 : 0))
-  scores.push(new ScoreButton(160, 220, "Small\nStraight", (counts, total) => counts.match(/[12]{4}/) ? 30 : 0))
-  scores.push(new ScoreButton(210, 220, "Large\nStraight", (counts, total) => counts.match(/1{4}/) ? 40 : 0))
-  scores.push(new ScoreButton(260, 220, "Yahtzee", (counts, total) => counts.match(/5/) ? 50 : 0))
-  scores.push(new ScoreButton(260, 110, "Chance", (counts, total) => total))
-
+  scores.push(new ScoreButton(120, 120, "3 of a\nkind", (counts, total) => counts.match(/3|4|5/) ? total : 0))
+  scores.push(new ScoreButton(170, 120, "4 of a\nkind", (counts, total) =>  counts.match(/4|5/) ? total : 0))
+  scores.push(new ScoreButton(220, 120, "Full\nHouse", (counts, total) => counts.match(/20*3|30*2/) ? 25 : 0))
+  scores.push(new ScoreButton(120, 170, "Small\nStraight", (counts, total) => counts.match(/[12]{4}/) ? 30 : 0))
+  scores.push(new ScoreButton(170, 170, "Large\nStraight", (counts, total) => counts.match(/1{4}/) ? 40 : 0))
+  scores.push(new ScoreButton(220, 170, "Yahtzee", (counts, total) => counts.match(/5/) ? 50 : 0))
+  scores.push(new ScoreButton(120, 220, "Chance", (counts, total) => total))
   // score.yahtzeeBonusCounter
   // score.yahtzeeBonus = 100 * score.yahtzeeBonusCounter 
   // score.lowerTotal
@@ -275,9 +293,22 @@ function draw() {
   background(bgColor)
   fill("#FFF")
   
-  dice.forEach(e => e.show())
-  scores.forEach(e => e.show())
+  dice.forEach(d => d.show())
+  scores.forEach(s => s.show())
   rollButton.show()
+
+  // sub-bonus, sub total
+  textSize(15)
+  textAlign(LEFT, TOP)
+  scoreTopSubtotal = 0
+  for (i = 0; i < 6; i++) {
+    scoreTopSubtotal += scores[i].score
+    if (scoreTopSubtotal >= 63) {
+      scoreTopBonus = 35
+    }
+  }
+  // (>62?)
+  text(`Sub:${scoreTopSubtotal} + >${scoreTopBonus}`, 25, 280)
   
   // Game states
   // Click to roll dice
@@ -289,44 +320,9 @@ function draw() {
   else if (game.state == 1) { }
 }
 
-
-
-function scoreFullHouse() {
-  let string = ""
-  dice.forEach(d => string += d.value)
-  //(\1/
-  
-  return score
-}
-
 function mousePressed() {
   dice.forEach(d => d.click(mouseX, mouseY))
   scores.forEach(s => s.click(mouseX, mouseY))
   rollButton.click(mouseX, mouseY)
   console.log("click")
 }
-
-
-      // "UPPER SECTION"
-      //score.ones = counter[0] * 1
-      //score.twos = counter[1] * 2
-      //score.threes = counter[2] * 3
-      //score.fours = counter[3] * 4
-      //score.fives = counter[4] * 5
-      //score.sixes = counter[5] * 6
-      // score.upperSubTotal
-      // score.bonus if 63 or more, give 35 points
-      // score.upperTotal = score.upperSubTotal + score.bonus
-      
-      // "LOWER SECTION"
-      //score.threeOfAKind = counts.match(/{3-5}/) ? diceTotal : 0
-      //score.fourOfAKind =  counts.match(/{4-5}/) ? diceTotal : 0
-      //score.fullHouse = counts.match(/20*3|30*2/) ? 25 : 0
-      //score.smallStraight = counts.match(/[12]{4}/) ? 30 : 0
-      //score.largeStraight = counts.match(/1{4}/) ? 40 : 0
-      //score.yahtzee = counts.match(/5/) ? 50 : 0
-      //score.chance = diceTotal
-      //score.yahtzeeBonusCounter
-      //score.yahtzeeBonus = 100 * score.yahtzeeBonusCounter 
-      // score.lowerTotal
-      // score.grandtotal

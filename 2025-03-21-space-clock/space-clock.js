@@ -37,8 +37,8 @@ YEAR SCALE
 const MY_LONGITUDE = -122.2 // Negative is W, positive is E
 const MY_LATITUDE = 48      // Negative is S, positive is N. Not used currently
 
-const USE_CUSTOM_START_TIME = true
-const CUSTOM_START_TIME = new Date('2026-04-06T01:29:00')
+const USE_CUSTOM_TIME = false
+const CUSTOM_TIME = new Date('2026-04-06T01:29:00')
 let currentTime = new Date()
 
 const USE_FAST_FORWARD = false
@@ -55,7 +55,7 @@ let sunX = canvasW * .50
 let sunY = canvasH * .25
 let sunDiameter = canvasW / 6
 let sunColor = ('#FCE570')
-// Sun rotation time 25d 9h 7m 11.6s 35d
+// Sun rotation time =  25d 9h 7m 11.6s 35d
 let sunRayDiameter = sunDiameter * 1.2
 
 // EARTH
@@ -93,12 +93,12 @@ let venusColor = ('#8B91F1')
 
 function setup() {
   textOutput() // Create screen reader accessible description
-  createCanvas(canvasW, canvasH)
+  createCanvas(canvasW, canvasH).attribute("title","The earth, moon, sun, mercury, and venus. Not to scale")
   angleMode(DEGREES)
   ellipseMode(CENTER)
   earthPoleTilt = (earthDiameter/2) * sin(23.44) // The earth's axis tilt
-  if (USE_CUSTOM_START_TIME) {
-    currentTime = new Date(CUSTOM_START_TIME)
+  if (USE_CUSTOM_TIME) {
+    currentTime = new Date(CUSTOM_TIME)
   }
 }
 
@@ -108,14 +108,14 @@ function draw() {
   background(fillColor)
 
   // Logic to update time
-  if (!USE_CUSTOM_START_TIME) {
+  if (!USE_CUSTOM_TIME) {
     if (!USE_FAST_FORWARD) {
       currentTime = new Date()
     } else {
       currentTime = new Date(currentTime.getTime() + FAST_FORWARD_SPEED * 10000)
     }
   }
-  if (USE_CUSTOM_START_TIME) {
+  if (USE_CUSTOM_TIME) {
     if (!USE_FAST_FORWARD) {
       currentTime = new Date(currentTime.getTime() + deltaTime)
     } else {
@@ -363,6 +363,7 @@ function monthNumberToName(monthNumber) {
 
     return monthNames[monthNumber]
 }
+
 
 function drawLunarPhaseName(percent) {
   let phaseName = lunarPhaseName(percent)
