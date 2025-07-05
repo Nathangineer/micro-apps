@@ -68,10 +68,12 @@ let rollTryMax = 3
 let rollButton
 
 // UI
-const BUTTON_W = 40
+const DICE_SIZE = 40
+const SCORE_W = 45
+const SCORE_H = 40
 const BUTTON_H = 40
-const PIP_DIST = BUTTON_W / 3.6
-const PIP_SIZE = 10
+const PIP_DIST = DICE_SIZE / 3.6
+const PIP_SIZE = 9
 const DICE_Y = 85
 const UPPER_Y = 118
 const LOWER_Y = 210
@@ -79,27 +81,35 @@ const SPACING = 45
 const MARGIN = 15
 
 //colors
-let bgColor = "#FFF"
-let diceColor = "#000"
-let diceLockedColor = "#333"
-let diceFill = "#FFF"
-let diceLockedFill = "#DDD"
+let bgColor = "#AAF"
 
+let diceColor = "#000"
+let diceFill = "#FFF"
+let diceLockedColor = "#000"
+let diceLockedFill = "#DDD"
 
 let scoreEmptyColor = "#000000"
 let scoreEmptyFill = "#FFFFFF"
-let scorePreviewColor = "#202000"
-let scorePreviewFill = "#FFFF66"
-let scoreFinColor = "#000077"
-let scoreFinFill = "#CCCCFF"
+let scorePreviewColor = "#222200"
+let scorePreviewFill = "#0F0"
+let scoreFinalColor = "#000"
+let scoreFinalFill = "#CCC"
+let scoreRadius = 0
+let scoreTextSize = 9.5
+
+let rollColor = "#000"
+let rollFill = "#0F0"
+let rollsOverFill = "#DDD"
+let rollRadius = 20
+let rollTextSize = 30
 
 
 class Dice {
   constructor(x, y, value = false){
     this.x = x
     this.y = y
-    this.w = BUTTON_W
-    this.h = BUTTON_H
+    this.w = DICE_SIZE
+    this.h = DICE_SIZE
     this.value = 0
     this.active = false
     this.locked = false
@@ -162,27 +172,28 @@ class RollButton {
     constructor(x, y){
         this.x = x
         this.y = y
-        this.w = BUTTON_W*6.5
+        this.w = DICE_SIZE*6.5
         this.h = BUTTON_H
         this.text = "ROLL"
         this.active = true
     }
-    show(){
-        stroke(0); fill(255); strokeWeight(3)
+    show(){ 
+        fill(rollFill);
+        if (rollTryCounter === 1) {
+            this.text = "ROLL"
+        } else if (rollTryCounter === 2) {
+            this.text = "REROLL"
+        } else if (rollTryCounter === 3) {
+            this.text = "FINAL ROLL"
+        } else if (rollTryCounter === 4) {
+            this.text = "CHOOSE SCORE"
+            fill(rollsOverFill)
+        }
+   stroke(rollColor);  strokeWeight(3)
         rect(this.x, this.y, this.w, this.h, 20)
 
-        fill("#000"); noStroke()
-        textSize(30); textAlign(CENTER, CENTER)
-
-        if (rollTryCounter === 1) {
-          this.text = "ROLL"
-        } else if (rollTryCounter === 2) {
-          this.text = "REROLL"
-        } else if (rollTryCounter === 3) {
-          this.text = "FINAL ROLL"
-        } else if (rollTryCounter === 4) {
-          this.text = "CHOOSE SCORE"
-        }
+        fill(rollColor); noStroke()
+        textSize(rollTextSize); textAlign(CENTER, CENTER)
         text(this.text, this.x+this.w/2, this.y+this.h/2)
     }
     click(x, y){
@@ -198,8 +209,8 @@ class ScoreButton {
     constructor(x, y, name, callback){
         this.x = x
         this.y = y
-        this.w = BUTTON_W
-        this.h = BUTTON_H
+        this.w = SCORE_W
+        this.h = SCORE_H
         this.scoreName = name
         this.callback = callback
         this.score = null
@@ -210,8 +221,8 @@ class ScoreButton {
         let scoreValue
         // For actual score
         if (this.score != null) {
-            this.textColor = scoreFinColor
-            this.scoreFill = scoreFinFill
+            this.textColor = scoreFinalColor
+            this.scoreFill = scoreFinalFill
             scoreValue = this.score
             if (this.scoreName === "Yahtzee"  && this.scoreDice() > 0) {
               this.textColor = scorePreviewColor
@@ -228,12 +239,10 @@ class ScoreButton {
             }
         }
         fill(this.scoreFill); stroke(this.textColor); strokeWeight(2)
-        rect(this.x, this.y, this.w, this.h, 3)
+        rect(this.x, this.y, this.w, this.h, scoreRadius)
         
-        fill(this.textColor); textSize(10); textAlign(CENTER, CENTER); noStroke();
-        text(`${this.scoreName}\n${scoreValue}`, this.x+this.w/2, this.y+this.h/2)
-        textAlign(CENTER, BOTTOM);
-        //text(scoreValue, this.x + this.w/2, this.y + this.h - 2)
+        fill(this.textColor); textSize(scoreTextSize); textAlign(CENTER, CENTER); noStroke(); textStyle(BOLD)
+        text(`${this.scoreName}\n${scoreValue}`, this.x+this.w/2, this.y+this.h/2+1)
     }
     click(x, y){
         if (x > this.x && x < this.x + this.w && 
@@ -283,7 +292,7 @@ function setup() {
   scores.push(new ScoreButton(MARGIN + SPACING * 3, LOWER_Y, "Small\nStraight", (counts) => counts.match(/[12]{4}/) ? 30 : 0))
   scores.push(new ScoreButton(MARGIN + SPACING * 4, LOWER_Y, "Large\nStraight", (counts) => counts.match(/1{4}/) ? 40 : 0))
   scores.push(new ScoreButton(MARGIN + SPACING * 5, LOWER_Y, "Yahtzee", (counts) => counts.match(/5/) ? 50 : 0))
-  scores.push(new ScoreButton(MARGIN + SPACING * 0, LOWER_Y + SPACING, "Chance", (counts, total) => total))
+  scores.push(new ScoreButton(MARGIN + SPACING * 0, LOWER_Y + SCORE_H, "Chance", (counts, total) => total))
    
   textOutput()
   createCanvas(canvasW, canvasH)
@@ -291,7 +300,6 @@ function setup() {
 
 function draw() {
   background(bgColor)
-  fill("#FFF")
   
   dice.forEach(d => d.show())
   scores.forEach(s => s.show())
@@ -306,7 +314,7 @@ function draw() {
 function showScoreTotals() {
     scoreTopSubtotal = 0
     for (let i = 0; i <= 5; i++) {
-        scoreTopSubtotal += scores[i].score + 10
+        scoreTopSubtotal += scores[i].score
     }
     if (scoreTopSubtotal >= 63) scoreTopBonus = 35
     let topBonusMessage = scoreTopBonus === 0 ? "n/a" : scoreTopBonus
@@ -320,9 +328,8 @@ function showScoreTotals() {
 
     textSize(12)
     textAlign(LEFT, TOP) 
-    text(`Upper section subtotal: ${scoreTopSubtotal}\nOver 62 points Bonus: ${topBonusMessage}\nUpper Section Total: ${scoreTopTotal}`, MARGIN, UPPER_Y + SPACING)
-    text(`Lower Subtotal: ${scoreLowerTotal}\nYahtzee Bonuses: ${yahtzeeCounter}x\nGrand Total: ${scoreGrandTotal}`, MARGIN + SPACING, LOWER_Y + SPACING)
-
+    text(`Upper section subtotal — ${scoreTopSubtotal}\nBonus if over 62 points — ${topBonusMessage}\nUpper section total — ${scoreTopTotal}`, canvasW / 4, UPPER_Y + SPACING)
+    text(`Lower section subtotal — ${scoreLowerTotal}\nBonus Yahtzees — ${yahtzeeCounter*50}\nGrand total — ${scoreGrandTotal}`, canvasW / 4, LOWER_Y + SPACING)
 }
 
 function mousePressed() {
