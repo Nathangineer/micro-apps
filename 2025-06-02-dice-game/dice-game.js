@@ -50,7 +50,6 @@ CARDS
 
 let canvasW = 300
 let canvasH = 300
-let game = {state: 0}
 
 let dice = [false, false, false, false, false]
 let scores = []
@@ -61,8 +60,7 @@ let yahtzeeCounter
 let scoreLowerTotal
 let scoreGrandTotal
 
-let gameStates = ["CLICK TO START", "ROLL1", "ROLL2", "MUST_SCORE", "END"]
-let gameState = gameStates[0] 
+let gameOver = false
 let rollTryCounter = 1
 let rollTryMax = 3
 let rollButton
@@ -88,14 +86,14 @@ let diceFill = "#FFF"
 let diceLockedColor = "#000"
 let diceLockedFill = "#DDD"
 
-let scoreEmptyColor = "#000000"
-let scoreEmptyFill = "#FFFFFF"
-let scorePreviewColor = "#222200"
+let scoreEmptyColor = "#000"
+let scoreEmptyFill = "#FFF"
+let scorePreviewColor = "#220"
 let scorePreviewFill = "#0F0"
 let scoreFinalColor = "#000"
 let scoreFinalFill = "#CCC"
 let scoreRadius = 0
-let scoreTextSize = 9.5
+let scoreTextSize = 10
 
 let rollColor = "#000"
 let rollFill = "#0F0"
@@ -179,7 +177,9 @@ class RollButton {
     }
     show(){ 
         fill(rollFill);
-        if (rollTryCounter === 1) {
+        if (gameOver) {
+            this.text = "RESET GAME"
+        } else if (rollTryCounter === 1) {
             this.text = "ROLL"
         } else if (rollTryCounter === 2) {
             this.text = "REROLL"
@@ -191,17 +191,19 @@ class RollButton {
         }
    stroke(rollColor);  strokeWeight(3)
         rect(this.x, this.y, this.w, this.h, 20)
-
         fill(rollColor); noStroke()
         textSize(rollTextSize); textAlign(CENTER, CENTER)
         text(this.text, this.x+this.w/2, this.y+this.h/2)
     }
     click(x, y){
         if (x > this.x && y > this.y && 
-            x < this.x + this.w && y < this.y + this.h  &&
-            rollTryCounter <= rollTryMax) {
-            dice.forEach(d => d.roll())
-            rollTryCounter++
+            x < this.x + this.w && y < this.y + this.h) {
+            if (gameOver) {
+              resetGame()
+            } else if (rollTryCounter <= rollTryMax) {
+              dice.forEach(d => d.roll())
+              rollTryCounter++
+            }
         }
     }
 }
@@ -272,28 +274,7 @@ class ScoreButton {
 
 
 function setup() {
-  for (let i = 0; i < 5; i++){
-    dice[i] = new Dice(59*i+30, DICE_Y)
-  }
-  rollButton = new RollButton(15, 10)
-  
-  // "UPPER SECTION"
-  scores.push(new ScoreButton(MARGIN + SPACING * 0, UPPER_Y, "Ones",  (counts) => 1 * counts[0]))  
-  scores.push(new ScoreButton(MARGIN + SPACING * 1, UPPER_Y, "Twos",  (counts) => 2 * counts[1]))
-  scores.push(new ScoreButton(MARGIN + SPACING * 2, UPPER_Y, "Threes",(counts) => 3 * counts[2]))
-  scores.push(new ScoreButton(MARGIN + SPACING * 3, UPPER_Y, "Fours", (counts) => 4 * counts[3]))
-  scores.push(new ScoreButton(MARGIN + SPACING * 4, UPPER_Y, "Fives", (counts) => 5 * counts[4]))
-  scores.push(new ScoreButton(MARGIN + SPACING * 5, UPPER_Y, "Sixes", (counts) => 6 * counts[5]))
-  
-  // "LOWER SECTION"
-  scores.push(new ScoreButton(MARGIN + SPACING * 0, LOWER_Y, "3 of a\nkind", (counts, total) => counts.match(/3|4|5/) ? total : 0))
-  scores.push(new ScoreButton(MARGIN + SPACING * 1, LOWER_Y, "4 of a\nkind", (counts, total) =>  counts.match(/4|5/) ? total : 0))
-  scores.push(new ScoreButton(MARGIN + SPACING * 2, LOWER_Y, "Full\nHouse", (counts) => counts.match(/20*3|30*2/) ? 25 : 0))
-  scores.push(new ScoreButton(MARGIN + SPACING * 3, LOWER_Y, "Small\nStraight", (counts) => counts.match(/[12]{4}/) ? 30 : 0))
-  scores.push(new ScoreButton(MARGIN + SPACING * 4, LOWER_Y, "Large\nStraight", (counts) => counts.match(/1{4}/) ? 40 : 0))
-  scores.push(new ScoreButton(MARGIN + SPACING * 5, LOWER_Y, "Yahtzee", (counts) => counts.match(/5/) ? 50 : 0))
-  scores.push(new ScoreButton(MARGIN + SPACING * 0, LOWER_Y + SCORE_H, "Chance", (counts, total) => total))
-   
+  resetGame() 
   textOutput()
   createCanvas(canvasW, canvasH)
 }
@@ -306,9 +287,22 @@ function draw() {
   rollButton.show()
   showScoreTotals()
 
+  // If all scores are non-null, end game
+  let emptyCount = 0
+  for (let i = 0; i < scores.length; i++) {
+    if (scores[i].score === null) {
+      emptyCount++
+    }
+  }
+  gameOver = emptyCount === 0 ? true : false
   // Game states? End condition? High score? Wordl style clipboard output?
-  if (game.state == 0) { } 
-  else if (game.state == 1) { }
+  
+  if (gameOver) {
+    push()
+    textLeading(32); textAlign(CENTER, CENTER); textSize(rollTextSize)
+    text(`Game Complete!\nFinal Score: ${scoreGrandTotal}`, canvasW / 2, DICE_Y)
+    pop()
+  } 
 }
 
 function showScoreTotals() {
@@ -336,4 +330,37 @@ function mousePressed() {
   dice.forEach(die => die.click(mouseX, mouseY))
   scores.forEach(score => score.click(mouseX, mouseY))
   rollButton.click(mouseX, mouseY)
+}
+
+function resetGame() {
+  dice = [false, false, false, false, false]
+  scores = []
+  scoreTopBonus = 0
+  gameOver = false
+  rollTryCounter = 1
+  rollTryMax = 3
+  rollButton
+
+  for (let i = 0; i < 5; i++){
+    dice[i] = new Dice(59*i+30, DICE_Y)
+  }
+  rollButton = new RollButton(15, 10)
+  
+  // "UPPER SECTION"
+  scores.push(new ScoreButton(MARGIN + SPACING * 0, UPPER_Y, "Ones",  (counts) => 1 * counts[0]))  
+  scores.push(new ScoreButton(MARGIN + SPACING * 1, UPPER_Y, "Twos",  (counts) => 2 * counts[1]))
+  scores.push(new ScoreButton(MARGIN + SPACING * 2, UPPER_Y, "Threes",(counts) => 3 * counts[2]))
+  scores.push(new ScoreButton(MARGIN + SPACING * 3, UPPER_Y, "Fours", (counts) => 4 * counts[3]))
+  scores.push(new ScoreButton(MARGIN + SPACING * 4, UPPER_Y, "Fives", (counts) => 5 * counts[4]))
+  scores.push(new ScoreButton(MARGIN + SPACING * 5, UPPER_Y, "Sixes", (counts) => 6 * counts[5]))
+  
+  // "LOWER SECTION"
+  scores.push(new ScoreButton(MARGIN + SPACING * 0, LOWER_Y, "3 of a\nkind", (counts, total) => counts.match(/3|4|5/)     ? total : 0))
+  scores.push(new ScoreButton(MARGIN + SPACING * 1, LOWER_Y, "4 of a\nkind", (counts, total) => counts.match(/4|5/)       ? total : 0))
+  scores.push(new ScoreButton(MARGIN + SPACING * 2, LOWER_Y, "Full\nHouse", (counts)         => counts.match(/20*3|30*2/) ? 25    : 0))
+  scores.push(new ScoreButton(MARGIN + SPACING * 3, LOWER_Y, "Small\nStraight", (counts)     => counts.match(/[12]{4}/)   ? 30    : 0))
+  scores.push(new ScoreButton(MARGIN + SPACING * 4, LOWER_Y, "Large\nStraight", (counts)     => counts.match(/1{5}/)      ? 40    : 0))
+  scores.push(new ScoreButton(MARGIN + SPACING * 5, LOWER_Y, "Yahtzee", (counts)             => counts.match(/5/)         ? 50    : 0))
+  scores.push(new ScoreButton(MARGIN + SPACING * 0, LOWER_Y + SCORE_H, "Chance", (counts, total) => total))
+  
 }

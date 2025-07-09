@@ -17,14 +17,14 @@ var player_last_pos = {"x" : 0, "y" : 0}
 var player_inventory = []
 
 const SCREEN_SIZE = 400 // square
-const MENU_WIDTH = 200
+const MENU_WIDTH = 0
 const tile_amt = 20
 const tile_total = tile_amt ** 2
 let tile_size = SCREEN_SIZE / tile_amt
 
 function setup() {
   textOutput() // Create screen reader accessible description
-  createCanvas(SCREEN_SIZE +  MENU_WIDTH, SCREEN_SIZE)
+  createCanvas(SCREEN_SIZE +  MENU_WIDTH, SCREEN_SIZE).attribute("title","Press 1-9 to change tile type. S to save")
   textAlign(CENTER, CENTER)
   textSize(20)
 }
@@ -33,6 +33,7 @@ function draw() {
   // Reset graphics
   background("#55A")
   
+  console.log(tile_size)
   // Edit board if mouse clicked in bounds
   if (mouseX > 0 && mouseY > 0 && mouseX < SCREEN_SIZE && mouseY < SCREEN_SIZE){
     var mouseIsOnCanvas = true
@@ -40,10 +41,8 @@ function draw() {
   if (mouseIsPressed && mouseIsOnCanvas) {
     let coord_x = floor(mouseX / tile_size)
     let coord_y = floor(mouseY / tile_size)
-    map_bg0[floor(coord_x + (coord_y * tile_size))] = current_tile
-    // console.log("x", coord_x, " y", coord_y)
-    // console.log(coord_x + (coord_y * 20))
-    // console.log(map_bg0)
+    let index = coord_x + coord_y * tile_amt
+    map_bg0[index] = current_tile
   }
   
   // Draw board

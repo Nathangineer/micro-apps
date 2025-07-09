@@ -71,9 +71,11 @@ let tile_size = EDITOR_SIZE / tile_amt
 let map_bg0 = new Array(tile_total).fill(0);
 let map_bg1 = new Array(tile_total).fill(0);
 let map_obj = new Array(tile_total).fill(0);
+
+
 function setup() {
   textOutput() // Create screen reader accessible description
-  createCanvas(EDITOR_SIZE +  MENU_WIDTH, EDITOR_SIZE)
+  createCanvas(EDITOR_SIZE +  MENU_WIDTH, EDITOR_SIZE).attribute("title","Press 1-9 to change tile type. S to save. L to load an example.")
   textAlign(CENTER, CENTER)
   textSize(tile_size)
 }
@@ -89,10 +91,9 @@ function draw() {
   if (mouseIsPressed && mouseIsOnCanvas) {
     let coord_x = floor(mouseX / tile_size)
     let coord_y = floor(mouseY / tile_size)
-    map_bg0[floor(coord_x + (coord_y * tile_size))] = current_tile
-    // console.log("x", coord_x, " y", coord_y)
-    // console.log(coord_x + (coord_y * 20))
-    // console.log(map_bg0)
+    
+    let index = coord_x + coord_y * tile_amt
+    map_bg0[index] = current_tile
   }
   
   // Draw board

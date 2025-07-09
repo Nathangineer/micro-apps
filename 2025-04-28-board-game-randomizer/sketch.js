@@ -103,6 +103,10 @@ function drawPlayers() {
     let pieceX = points[players[i]].x
     let pieceY = points[players[i]].y
 
+    fill(255)
+    textSize(30)
+    text(playerTokens[i], pieceX, pieceY)
+    
     fill(0)
     textSize(20)
     text(playerTokens[i], pieceX, pieceY)
