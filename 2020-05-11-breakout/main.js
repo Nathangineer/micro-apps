@@ -38,7 +38,7 @@ function setup() {
   
   // Initialize ball position
   ball.x = width / 2;
-  ball.y = height - paddle.y;
+  ball.y = height - paddleY - 5;
   
   // Initialize paddle position
   paddle.x = (width) / 2;
@@ -61,8 +61,7 @@ function draw() {
     textSize(32);
     fill(255);
     textAlign(CENTER, CENTER);
-    text("GAME OVER", width / 2, height / 2);
-    text("Score: " + score, width / 2, height / 2 + 40);
+    text(`Game Over\nScore: ${score}`, width / 2, height / 2);
     return;
   }
   
@@ -192,7 +191,7 @@ function draw() {
     } else {
       // Reset ball
       ball.x = width / 2;
-      ball.y = height - 30;
+      ball.y = height - paddleY - 5;
       ball.dx = 2;
       ball.dy = -2;
     }
