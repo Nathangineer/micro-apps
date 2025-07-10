@@ -1,7 +1,7 @@
 let canvasW = 300
 let canvasH = 300
 
-let brickRows = 6;
+let brickRows = 7;
 let brickCols = 5;
 let brickWidth = 54;
 let brickHeight = 15;
@@ -18,7 +18,7 @@ let ball = {
   x: 0,
   y: 0,
   dx: 2,
-  dy: -1.5,
+  dy: -2,
   r: 5
 };
 
