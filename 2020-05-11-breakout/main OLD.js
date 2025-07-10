@@ -1,24 +1,61 @@
+const canvasW = 300;
+const canvasH = 300;
+
+class Game {
+  constructor(){
+    this.state = "GAMEPLAY";
+    this.gameplay = new Gameplay();
+    this.menu = new Menu();
+  }
+  update() {
+    switch (this.state) {
+      case "GAMEPLAY":
+        this.gameplay.update();
+        break;
+      case "MENU":
+        this.menu.update();
+        break;
+      default:
+        // pass
+    }
+  }
+  changeState(state) {
+    
+  }
+  control(keyCode){
+
+  }    
+}
+
 class Gameplay {
   constructor(){
-    this.ball = new Ball(WIDTH / 2, height /4);
+    this.ball = new Ball(canvasW / 3, canvasH * 0.8);
     this.paddle = new Paddle();
-    this.bars = [];
-    // The following could be done with a list of coordinates
+    this.bricks = [];
     for (let i = 0 ; i < 4 ; i++) {
       for (let j = 0 ; j < 6 ; j++) {
-        this.bars.push(new Bar(10 + i*WIDTH / 4, 10 + j*30))
+        this.bricks.push(new Brick(10 + i*canvasW / 4, 10 + j*30))
       }
     }
   }
   update(){
+    this.checkCollision();
     this.ball.update();
     this.paddle.update();
-    for (const bar of this.bars) {
-      bar.update();
+    for (const brick of this.bricks) {
+      brick.update();
     }    
-    this.checkCollision();
-    
-    this.draw()
+    this.show()
+  }
+  show(){
+    blendMode(DIFFERENCE);
+    background(20, 40, 20, 150);
+    blendMode(BLEND);
+    this.ball.draw();
+    this.paddle.draw();
+    for (const brick of this.bricks) {
+      brick.draw();
+    }
   }
   checkCollision(){
     // Paddle collision
@@ -29,22 +66,14 @@ class Gameplay {
         // Play sound
       }
     }
-    // Bar collision
-    for (const bar of this.bars) {
-      let isHit = Collide.pointRect(this.ball, bar)
+    // brick collision
+    for (const brick of this.bricks) {
+      let isHit = Collide.pointRect(this.ball, brick)
       if (isHit){
-        const hitSide = Collide.pointRectSide(this.ball, bar)
+        const hitSide = Collide.pointRectSide(this.ball, brick)
         this.ball.collision(hitSide)
-        bar.collision(isHit);
+        brick.collision(isHit);
       }
-    }
-  }
-  draw(){
-    background(30);
-    this.ball.draw();
-    this.paddle.draw();
-    for (const bar of this.bars) {
-      bar.draw();
     }
   }
 }
@@ -59,8 +88,6 @@ class Collide {
   }
   
   static pointRectSide(A, B) {
-    console.log(A)
-    console.log(B)
     if        (A.xOld < B.x && A.x >= B.x) {
       return "LEFT HIT"
     } else if (A.yOld < B.y && A.y >= B.y) {
@@ -81,8 +108,8 @@ class Ball {
     this.y = y
     this.vx = 2
     this.vy = 2
-    this.w = 12 //width
-    this.h = 12 //height
+    this.w = 5 //width
+    this.h = 5 //height
   }
   
   update() {
@@ -95,7 +122,7 @@ class Ball {
   
   draw() {
     noStroke();
-    rectMode(CENTER);
+    rectMode(CORNER);
     rect(this.x, this.y, this.w, this.h)
   }
   
@@ -103,13 +130,13 @@ class Ball {
     console.log(type)
     switch (type) {
       case "LEFT HIT":
-        this.vx *= -1; break;
+        this.vx = -Math.abs(this.vx); break;
       case "RIGHT HIT":
-        this.vx *= -1; break;
+        this.vx = Math.abs(this.vx); break;
       case "TOP HIT":
-        this.vy *= -1; break;
+        this.vy = -Math.abs(this.vx); break;
       case "BOTTOM HIT":
-        this.vy *= -1; break;
+        this.vy = Math.abs(this.vx); break;
     }
   }
   wallCollision(){
@@ -137,7 +164,8 @@ class Paddle {
     this.x += this.v
   }
   draw() {
-    rect(this.x, this.y, this.w, this.h)
+    noStroke()
+    rect(this.x, this.y, this.w, this.h, 5)
   }
   _control(){
     let leftIsDown = keyIsDown(LEFT_ARROW)
@@ -159,7 +187,7 @@ class Paddle {
 }
 
 
-class Bar {
+class Brick {
   constructor(x, y) {
     this.x = x
     this.y = y    
@@ -168,8 +196,8 @@ class Bar {
     this.isHit = false;
   }
   draw() {
-    stroke(120);
-    rectMode(CORNER)
+    //stroke(120);
+    noStroke()
     rect(this.x, this.y, this.w, this.h)
   } 
   update() {
@@ -182,4 +210,22 @@ class Bar {
   collision(ball) {
     this.isHit = true;
   }
+}
+
+
+class Menu {
+  
+}
+
+function setup() {
+  createCanvas(canvasW, canvasH);
+  game = new Game();
+}
+
+function draw() {
+  game.update();
+}
+
+function keyPressed() {
+	game.control(keyCode)
 }
