@@ -8,18 +8,18 @@
 
 
 let totalPlayers = 2
-let playerTokens = ["❤︎", "♞", "♜", "🐜", "💀"]
+let playerTokens = ["❤︎", "💀", "♞", "♜", "🐜"]
 
 let canvasW = 300
 let canvasH = 300
 let pointIndexCounter = 0
 let springTension = .8 // Force per pixel from springLength
-let springLength = 10
+let springLength = 15
 let drag = .85
-let repel = 180
+let repel = 2000
 let pointNum = 100
 const margin = 20
-const tileSize = 12
+const tileSize = 15
 let gameState = { clickToStart: true,
                   playerRoll: false,
                   playerDone: false,
@@ -34,8 +34,6 @@ function pointObject() {
   this.x = Math.random()*(canvasW-margin*2)+margin
   this.y = Math.random()*(canvasH-margin*2)+margin
   this.index = pointIndexCounter
-  this.vx = 0
-  this.vy = 0
   this.vx = 0
   this.vy = 0
   this.ax = 0
@@ -80,11 +78,11 @@ function draw() {
   if (gameState.clickToStart == false) {
     if (gameState.playerRoll == true) {
       drawPlayers()
-      message = `Click to roll for player #${currentPlayer+1}`
+      message = `🎲 Player ${currentPlayer+1} Roll 🎲`
     }
     if (gameState.playerDone == true) {
       drawPlayers()
-      message = `Player #${currentPlayer+1} moves ${diceRoll} space${diceRoll == 1 ? "" : "s"}`
+      message = `(Player ${currentPlayer+1} Moves ${diceRoll} Space${diceRoll == 1 ? "" : "s"})`
     }
     if (gameState.gameOver == true) {
       message = `${currentPlayer+1} wins!`
@@ -104,7 +102,7 @@ function drawPlayers() {
     let pieceY = points[players[i]].y
 
     fill(255)
-    textSize(30)
+    textSize(25)
     text(playerTokens[i], pieceX, pieceY)
     
     fill(0)
@@ -151,7 +149,7 @@ function movePoints() {
       let xDistance = points[i].x - points[j].x
       let yDistance = points[i].y - points[j].y
       let distance = Math.sqrt(xDistance ** 2 + yDistance ** 2)
-      let repelForce = repel / (distance ** 3)
+      let repelForce = repel / ((distance / 1) ** 3)
       let xForce = repelForce * xDistance / distance
       let yForce = repelForce * yDistance / distance 
       points[i].fx += xForce
@@ -166,8 +164,8 @@ function movePoints() {
     points[i].vx += points[i].ax
     points[i].vy += points[i].ay
 
-    points[i].vx = constrain(points[i].vx * drag,-6, 6)
-    points[i].vy = constrain(points[i].vy * drag,-6, 6)
+    points[i].vx = constrain(points[i].vx * drag,-3, 3)
+    points[i].vy = constrain(points[i].vy * drag,-3, 3)
 
     // wall collision
     if (points[i].x < margin) {points[i].x = margin}

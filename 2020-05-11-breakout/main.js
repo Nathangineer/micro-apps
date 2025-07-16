@@ -1,17 +1,14 @@
 let canvasW = 300
 let canvasH = 300
 
-let brickRows = 7;
-let brickCols = 5;
-let brickWidth = 54;
-let brickHeight = 15;
-let brickPadding = 5;
-let brickMarginTop = 5;
-let brickMarginLeft = 5;
+let brickRows = 10;
+let brickCols = 9;
+let brickWidth = 25;
+let brickHeight = 8;
+let brickPadding = 4;
+let brickMarginTop = 15;
+let brickMarginLeft = 20;
 let bricks = [];
-
-let paddleWidth = 60
-let paddleY = 50
 let paddleH = 10
 
 let ball = {
@@ -24,13 +21,13 @@ let ball = {
 
 let paddle = {
   x: 0,
-  y: paddleY,
-  w: paddleWidth,
-  h: paddleH
+  y: canvasH - 50,
+  w: 60,
+  h: 10
 };
 
 let score = 0;
-let lives = 5;
+let lives = 4;
 let gameOver = false;
 
 function setup() {
@@ -38,24 +35,35 @@ function setup() {
   
   // Initialize ball position
   ball.x = width / 2;
-  ball.y = height - paddleY - 5;
+  ball.y = paddle.y - 5;
   
   // Initialize paddle position
   paddle.x = (width) / 2;
   
   // Initialize bricks
-  for (let c = 0; c < brickCols; c++) {
-    bricks[c] = [];
-    for (let r = 0; r < brickRows; r++) {
-      bricks[c][r] = {x: 0, y: 0, w: brickWidth, h: brickHeight, status: 1,
-        color: color(random(100, 230), random(100, 230), random(100, 230))
+  makeBlocks();
+}
+
+function makeBlocks() {
+  
+  noiseSeed(millis + Math.random()*2000);
+  noiseDetail(6, 1);
+  for (let col = 0; col < brickCols; col++) {
+    bricks[col] = [];
+    for (let row = 0; row < brickRows; row++) {
+      bricks[col][row] = {
+        x: 0, y: 0, w: brickWidth, h: brickHeight, status: 1,
+        color: color(random(120, 230), random(120, 230), random(120, 230))
       };
+      if (noise(col / 5, row / 5) > 1.75) { bricks[col][row].status = 0; }
+
     }
   }
 }
 
 function draw() {
-  background(0);
+  blendMode(HARD_LIGHT)
+  background(0, 0, 0, 50);
   
   if (gameOver) {
     textSize(32);
@@ -89,8 +97,8 @@ function draw() {
   ellipseMode(CORNER)
   
   fill(256, 256, 0)
-  ellipse(paddle.x, height - paddle.y, paddle.w, paddle.h);
-  rect(paddle.x, height - paddle.y + paddle.h/3, paddle.w, paddle.h*2/3, 10);
+  ellipse(paddle.x, paddle.y, paddle.w, paddle.h);
+  rect(paddle.x, paddle.y + paddle.h/3, paddle.w, paddle.h*2/3, 10);
   
   // Draw score
   textSize(20);
@@ -112,26 +120,25 @@ function draw() {
   ball.x += ball.dx;
   ball.y += ball.dy;
   
-  // Wall collision (left/right)
+  // Wall collision
   if (ball.x + ball.r > width) {
     ball.dx = -abs(ball.dx);
   }
   if (ball.x - ball.r < 0) {
     ball.dx = abs(ball.dx);
   }
-  
-  // Wall collision (top)
   if (ball.y - ball.r < 0) {
     ball.dy = abs(ball.dy);
   }
   
   // Paddle collision
-  if (ball.y + ball.r > height - paddle.y &&
+  if (ball.y + ball.r > paddle.y &&
+      ball.y < paddle.y + paddle.h * 1.5 &&
       ball.x > paddle.x &&
       ball.x < paddle.x + paddle.w) {
     ball.dy = -abs(ball.dy);
     
-    // Add some angle variation based on where ball hits paddle
+    // Add angle variation based on where ball hits paddle
     let hitPos = (ball.x - paddle.x) / paddle.w;
     ball.dx += map(hitPos, 0, 1, -5, 5)
     ball.dx = constrain(ball.dx, -5, 5)
@@ -143,33 +150,30 @@ function draw() {
     for (let r = 0; r < brickRows; r++) {
       let b = bricks[c][r];
       if (b.status === 1) {
-          // Check if ball is overlapping with the brick at all
+          // If ball is overlapping with the brick from any direction
           if (ball.x + ball.r > b.x && 
               ball.x - ball.r < b.x + b.w && 
               ball.y + ball.r > b.y && 
               ball.y - ball.r < b.y + b.h) {
 
-              // Find which side was hit (top, bottom, left, right)
+              // Find the smallest overlap to determine side hit
               let overlapLeft = ball.x + ball.r - b.x;
               let overlapRight = b.x + b.w - (ball.x - ball.r);
               let overlapTop = ball.y + ball.r - b.y;
               let overlapBottom = b.y + b.h - (ball.y - ball.r);
-
-              // Find the smallest overlap (indicates the side hit)
               let minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
 
-              // React based on which side was hit
               if (minOverlap === overlapTop) {
-                  ball.dy = -abs(ball.dy); // Hit top
+                  ball.dy = -abs(ball.dy)
               } 
               else if (minOverlap === overlapBottom) {
-                  ball.dy = abs(ball.dy); // Hit bottom
+                  ball.dy = abs(ball.dy)
               } 
               else if (minOverlap === overlapLeft) {
-                  ball.dx = -abs(ball.dx); // Hit left
+                  ball.dx = -abs(ball.dx)
               } 
               else if (minOverlap === overlapRight) {
-                  ball.dx = abs(ball.dx); // Hit right
+                  ball.dx = abs(ball.dx)
               }
 
               b.status = 0;
@@ -191,9 +195,17 @@ function draw() {
     } else {
       // Reset ball
       ball.x = width / 2;
-      ball.y = height - paddleY - 5;
+      ball.y = paddle.y - 5;
       ball.dx = 2;
       ball.dy = -2;
     }
+  }
+}
+
+function mouseReleased(){
+  if (gameOver) {
+    makeBlocks();
+    lives = 4
+    gameOver = false
   }
 }

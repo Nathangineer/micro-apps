@@ -18,6 +18,7 @@ const PLAYER_MAX_SPEED = 2
 const PLAYER_SIZE = 20
 const PLAYER_COLOR = "#00f"
 const PLAYER_DRAG = .95
+const RAY_RESOLUTION = 5 // This is very low
 let walls = [];
 let wallCount = 3;
 let particle;
@@ -251,7 +252,7 @@ class Particle {
 	constructor(){
 		this.pos = createVector(width / 2, height / 2);
 		this.rays = [];
-		for (let i = 0 ; i < 360 ; i += .1){
+		for (let i = 0 ; i < 360 ; i += RAY_RESOLUTION){
 			this.rays.push(new Ray(this.pos, radians(i)));
 		}
 	}

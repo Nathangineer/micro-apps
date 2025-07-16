@@ -10,10 +10,11 @@ const Y_TILES = 15
 const TILE_SIZE = 20
 const WIDTH = X_TILES * TILE_SIZE
 const HEIGHT = Y_TILES * TILE_SIZE
-const TEXT_SIZE = TILE_SIZE * .7
-const GUI_HEIGHT = 40
+const TEXT_SIZE = TILE_SIZE * .9
+const APPLE_SIZE = TILE_SIZE * .9
+const GUI_HEIGHT = 30
 const FRAME_RATE = 4
-const BORDER_THICKNESS = 3
+const BORDER_W = 8
 
 // state variables
 let game_state = 0
@@ -33,14 +34,14 @@ let appleEyeVector
 class Snake {
   constructor() {
     this.alive = true
-    this.maxLength = 1
+    this.length = 2
     this.body = [
-        {x: 7, y: 4},
-        {x: 7, y: 5}
+        {x: Math.floor(X_TILES / 2), y: 5},
+        {x: Math.floor(X_TILES / 2), y: 6}
       ]
       this.direction = {
-        x: 1,
-        y: 0
+        x: 0,
+        y: 1
       }
   }
   move() {
@@ -56,7 +57,7 @@ class Snake {
       this.body.pop()
       return
     }
-    if (this.body.length > this.maxLength) {
+    if (this.body.length > this.length) {
       this.body.shift()
     }
     input_received = false
@@ -87,7 +88,7 @@ class Snake {
     let lastX = this.body.slice(-1)[0].x
     let lastY = this.body.slice(-1)[0].y
     if (apple.x == lastX && apple.y == lastY) {
-      this.maxLength++
+      this.length++
 	  score++
       return true
     }
@@ -95,15 +96,17 @@ class Snake {
   draw() {
     // this shouldn't be calculated every frame
     for (let i = 0; i < this.body.length; i++) {
-	  fill(
-		128 + sin(i/4 + 3)*128,
-		128 + sin(i/2 + 1.5)*128,
-		128 + sin(i/4 + 0)*128	  
-	  )
-    rect(this.body[i].x * TILE_SIZE,
-      this.body[i].y * TILE_SIZE,
-      TILE_SIZE,
-      TILE_SIZE)
+      fill(
+        196 + sin(i * PI/4 + PI)*64,
+        196 - sin(i * PI/10 + PI/3)*64,
+        196 + sin(i * PI/13 + PI/5)*64	  
+      )
+      rect(
+        this.body[i].x * TILE_SIZE,
+        this.body[i].y * TILE_SIZE,
+        TILE_SIZE,
+        TILE_SIZE
+      )
     }
     // draw eyes
     push()
@@ -164,7 +167,7 @@ class Apple {
 	draw() {
 		fill(230, 0, 0)
 		textAlign(CENTER, CENTER)
-		textSize(TEXT_SIZE)
+		textSize(APPLE_SIZE)
 		text('🍎', this.x * TILE_SIZE+TILE_SIZE/2, this.y * TILE_SIZE+TILE_SIZE/2)
     
     let snakex = snake.body.slice(-1)[0].x
@@ -180,30 +183,36 @@ class Apple {
 let snake = new Snake()
 let apple = new Apple(9, 9)
 let font
-
+///////////////////////////////////////////////////////////////////////////////
 function preload() {
-  font = loadFont("UbuntuMono-Bold.ttf")  
+  //font = loadFont("UbuntuMono-Bold.ttf")  
 }
-
+///////////////////////////////////////////////////////////////////////////////
 function setup() {
-  textFont("Consolas")
+  //textFont("Consolas")
 	createCanvas(WIDTH, HEIGHT + GUI_HEIGHT)
 	frameRate(FRAME_RATE)
   appleEyeVector = createVector(0, 0)
 }
+///////////////////////////////////////////////////////////////////////////////
 function draw() {
-	background(20)
+	background(45, 0, 45)
   noStroke()
 	fill(255)
 	textAlign(CENTER, CENTER)
 	textSize(TEXT_SIZE)
-  
-  noTurns = moves - turns
-	text(
-`NOW 🐍${score+3} 🍎${score} ↔️${turns} ⬆️${noTurns} ⬅️${turnsLeft} ➡️${turnsRight} 👟${moves}
-HI: 🐍 ${score+3}  🍎 ${score}  ↔️ ${turns}  ⬆️ ${noTurns}  👟 ${moves}`, 0, HEIGHT+GUI_HEIGHT/4, WIDTH)
+  textLeading(TEXT_SIZE*1.3)
 
+  // draw border
+	fill(0)
+	strokeWeight(BORDER_W)
+	stroke(50, 50, 255)
+	rect(TILE_SIZE, TILE_SIZE, WIDTH - TILE_SIZE*2, HEIGHT - TILE_SIZE*2)
+	noStroke() 
+
+  snake.draw()
   if (game_state == 0) {
+    fill(255)
     text("I'm hungry!", WIDTH/2, HEIGHT/2)
     if (input_received == true) {
       input_received = false
@@ -213,27 +222,29 @@ HI: 🐍 ${score+3}  🍎 ${score}  ↔️ ${turns}  ⬆️ ${noTurns}  👟 ${m
   if (game_state == 1) {
     let eaten = snake.isAppleEdible(apple)
     apple.move(eaten)
-    apple.draw()  
+    apple.draw()
     snake.checkCollision()
     snake.move()
     moves++
   }  
   if (snake.alive == false){
     //game_state = 2
+    fill(255)
     text("Ouch", WIDTH/2, HEIGHT/2)
-    // = `Your turned left 25% more than right. You moved an average of x spaces between apples.
+    // = `You turned left 25% more than right. You moved an average of x spaces between apples.
     //You turned on 70% of moves, instead of moving forward. You rotated this many degrees CW: 1080,
     //which is 23 rotations.`
   }
-    snake.draw()
 
-	//draw border
-	noFill()
-	strokeWeight(BORDER_THICKNESS)
-	stroke(50, 50, 255)
-	rect(TILE_SIZE, TILE_SIZE, WIDTH - TILE_SIZE*2, HEIGHT - TILE_SIZE*2)
-	noStroke()  
+
+  
+	textSize(TEXT_SIZE); fill(255)
+  noTurns = moves - turns
+	text(
+`🐍 ${score+2}   🍎 ${score}   👟 ${moves}
+⬅️ ${turnsLeft}   ➡️ ${turnsRight}   ⬆️ ${noTurns}`, 0, HEIGHT+GUI_HEIGHT/4, WIDTH)
 }
+///////////////////////////////////////////////////////////////////////////////
 
 function resetGame() {
   game_state = 0
@@ -250,25 +261,35 @@ function resetGame() {
 }
 
 function keyPressed() {
-  if (game_state == 0) game_state = 1
-  if (game_state == 2) resetGame()
-	if (input_received) {return}
+  if (game_state == 0) {
+    game_state = 1
+  }
+  if (game_state === 1) {
+    if (input_received) {return}
 
-  let moveDir = {x: 0,  y: 0}
+    let moveDir = {x: 0,  y: 0}
 
-  switch (keyCode) {
-    case LEFT_ARROW:
-      moveDir.x = -1
-      break
-    case RIGHT_ARROW:
-      moveDir.x = 1
-      break
-    case UP_ARROW:
-      moveDir.y = -1
-      break
-    case DOWN_ARROW:
-      moveDir.y = 1
-      break
-	}
-	snake.changeDirection(moveDir)
+    switch (keyCode) {
+      case LEFT_ARROW:
+        moveDir.x = -1
+        break
+      case RIGHT_ARROW:
+        moveDir.x = 1
+        break
+      case UP_ARROW:
+        moveDir.y = -1
+        break
+      case DOWN_ARROW:
+        moveDir.y = 1
+        break
+    }
+    if (moveDir.x != 0 || moveDir.y != 0){
+      snake.changeDirection(moveDir)
+    }
+  
+  }
+  else if (game_state == 2) {
+    resetGame()
+  }
+
 }
