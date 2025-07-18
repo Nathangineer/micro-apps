@@ -342,14 +342,15 @@ function drawMainClock(){
   let Hour = currentTime.getHours()
   let Min = currentTime.getMinutes()
   let Sec = currentTime.getSeconds()
-  let noon = Hour >= 12? " pm" : " am"
+  let noon = Hour >= 12? `pm` : `am`
   Hour %= 12
   if (Hour == 0) Hour = "12"
-  if (Min < 10)  Min = "0" + Min
-  if (Sec < 10)  Sec = "0" + Sec
+  if (Min < 10)  Min = `0${Min}`
+  if (Sec < 10)  Sec = `0${Sec}`
 
-  text(Hour + ":" + Min + ":" + Sec + noon 
-       + "\n" + monthName + " " + Day + ", " + Year, width/2, height/2)
+  let time = `${Hour}:${Min}:${Sec}${noon}`
+  let date = `${monthName} ${Day}, ${Year}`
+  text(`${date}          ${time}`, width/2, height/2 + 4)
 
   resetGraphics()
 }
