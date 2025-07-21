@@ -165,8 +165,8 @@ class PushBlock extends Tile {
 	console.log(nextTile)
 	if (isMovable) {
 	  game_map.swapTiles({x:this.x,y:this.y},nextTile)
-      this.y += moveDir.x;
-	  this.x += moveDir.y;
+      this.x += moveDir.x;
+	  this.y += moveDir.y;
 	  return true;
     }
     return false;
@@ -189,7 +189,7 @@ class Game_Map {
   }
   pushAgainst(tile, direction) {
 	console.log(this.tile_array[tile.y][tile.x].pushAgainst(direction));
-    return this.tile_array[tile.x][tile.y].pushAgainst(direction);
+    return this.tile_array[tile.y][tile.x].pushAgainst(direction);
   }
   swapTiles(t1, t2){
 	  let tempTile = this.tile_array[t1.y][t1.x];
@@ -276,7 +276,10 @@ function keyPressed() {
   let isMovable = game_map.pushAgainst(pushedTile, moveDir);
 
   if (isMovable) {
-    player.move(moveDir.x, moveDir.y);
+    if (player.x + moveDir.x >= 0 && player.x + moveDir.x < GAME_MAP[0].length &&
+        player.y + moveDir.y >= 0 && player.y + moveDir.y < GAME_MAP.length) {
+        player.move(moveDir.x, moveDir.y);
+    }
   }
   redraw()
 }

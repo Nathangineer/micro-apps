@@ -2,8 +2,10 @@ let canvasW = 300
 let canvasH = 300
 let waveHeight = 100
 let noiseScale = 200
-let noiseSpeed = .002
+let noiseSpeed = .00002
 let player
+let playerDrag = .01
+let playerRebou
 let elevations = []
 
 function setup() {
@@ -12,30 +14,29 @@ function setup() {
 }
 
 function draw() {
-  background(20)
+  background(0)
   stroke(255)
-
   
   elevations = []
   for (let i = 0; i <= canvasW; i++) {
-    elevations.push(canvasH * noise(i / noiseScale, frameCount * noiseSpeed))
+    elevations.push(canvasH * noise(i / noiseScale, frameCount * noiseSpeed) + 100)
   }                 
-
+  fill(0)
   beginShape()
   for (let i = 0; i <= canvasW; i++) {
-    let elev = canvasH * noise(i / noiseScale, frameCount * noiseSpeed);
-    // point(i, elev)
+    // point(i, elevations[i]) // Old way
     vertex(i, elevations[i])
   }
-  vertex(canvasW, canvasH)
-  vertex(0, canvasH)
+  vertex(canvasW + 5, elevations[width])
+  vertex(canvasW + 5, canvasH + 5)
+  vertex(-5, canvasH + 5)
   endShape(FILL)
 
 
   player.input();
   player.show()
-
   player.move()
+
 }
 
 class Ball {
@@ -75,9 +76,8 @@ class Ball {
       let adjustedHeight = elevations[constrain(playerPos - i + this.r, 0, canvasW)] - this.heights[i]
       if (adjustedHeight < minTouchY) {
         minTouchY = adjustedHeight
-        minTouchX = playerPos - i
+        minTouchX = playerPos
       }
-      minTouchY = min(minTouchY, adjustedHeight)
     }
     //debug circle
     //push(); fill(0); circle(minTouchX, minTouchY, 5); pop();
@@ -87,7 +87,7 @@ class Ball {
     
     this.f += (this.dxR - this.dxL) / 20
     this.v += this.f
-    this.v *= 0.99
+    this.v *= 1 - playerDrag
 
     if (this.x <= 0) {
       this.v = abs(this.v) * .9
@@ -101,17 +101,19 @@ class Ball {
     this.y = minTouchY
   }
   show() {
-    fill(128)
+    fill(0)
     rectMode(CENTER)
     push()
-    translate(player.x, player.y)
+    translate(this.x, this.y)
       rotate(this.angle)
-      circle(0, 0, player.r * 2)
+      circle(0, 0, this.r * 2)
       fill(0)
-      rect(0,0,player.r * sqrt(2))
+      rect(0,0,this.r)
       fill(0)
-      rect(0,0,player.r -4)
     pop()
-      //triangle(this.x, this.y, this.x - 5, this.y - 10, this.x + 5, this.y - 10)
+    rect(this.x, this.y-13, 5, 25)
+    circle(this.x, this.y, this.r /2)
+    
+    //triangle(this.x, this.y, this.x - 5, this.y - 10, this.x + 5, this.y - 10)
   }
 }
