@@ -17,7 +17,7 @@ const GAME_MAP = [
   "100000000001",
   "111111111111"
 ];
-const TILE_SIZE = 30;
+const TILE_SIZE = 25;
 
 
 class Player {
@@ -210,7 +210,7 @@ let game_map = new Game_Map();
 let player = new Player(10, 10);
 
 function setup() {
-  createCanvas(480, 480);
+  createCanvas(300, 300);
 
   // Load Map function
   let temp_map = [];
@@ -247,6 +247,7 @@ function draw() {
   background(0);
   game_map.show();
   player.show();
+  noLoop()
 }
 
 
@@ -277,4 +278,5 @@ function keyPressed() {
   if (isMovable) {
     player.move(moveDir.x, moveDir.y);
   }
+  redraw()
 }

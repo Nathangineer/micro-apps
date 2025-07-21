@@ -51,7 +51,7 @@ function setup() {
 
     resetGame()
     createButtons()
-    shuffleDisks()
+    //shuffleDisks()
 }
 
 function draw() {
@@ -103,12 +103,12 @@ function drawDisks() {
 function createButtons() {
     const container = select('#button-container')
     const directions = [
-        {from: 0, to: 2, name:`🠈`},
-        {from: 0, to: 1, name:`🠊`},
-        {from: 1, to: 0, name:`🠈`},
-        {from: 1, to: 2, name:`🠊`},
-        {from: 2, to: 1, name:`🠈`},
-        {from: 2, to: 0, name:`🠊`}
+        {from: 0, to: 2, name:`🠜`},
+        {from: 0, to: 1, name:`🠞`},
+        {from: 1, to: 0, name:`🠜`},
+        {from: 1, to: 2, name:`🠞`},
+        {from: 2, to: 1, name:`🠜`},
+        {from: 2, to: 0, name:`🠞`}
     ]
 
     directions.forEach((dir, i) => { //(name, x, y, w, h, callback)
