@@ -1,27 +1,40 @@
 let canvasW = 300
 let canvasH = 300
-let waveHeight = 100
-let noiseScale = 200
-let noiseSpeed = .00002
+let waveHeight = 500
+let waveTop = 250
+let noiseScale = .05
+let noiseSpeed = .002
 let player
 let playerDrag = .01
 let playerRebou
 let elevations = []
+let minElev = 0
+let maxElev = 500
+let bullets = []
 
 function setup() {
   createCanvas(300, 300);
   player = new Ball(canvasW / 2);
+  noiseDetail(6, .1)
 }
 
 function draw() {
-  background(0)
+  background(20)
   stroke(255)
   
   elevations = []
   for (let i = 0; i <= canvasW; i++) {
-    elevations.push(canvasH * noise(i / noiseScale, frameCount * noiseSpeed) + 100)
-  }                 
-  fill(0)
+    let elevationPoint = waveHeight * noise(i * noiseScale, frameCount * noiseSpeed) + waveTop
+    elevations.push(elevationPoint)
+    minElev = min(minElev, elevationPoint)
+    maxElev = max(maxElev, elevationPoint)
+  }    
+  // scale elevations to always be the full wave height
+  for (let i = 0; i < elevations.length; i++) {
+    elevations[i] = map(elevations[i], minElev, maxElev, waveTop, height)
+  }  
+  
+  fill(50)
   beginShape()
   for (let i = 0; i <= canvasW; i++) {
     // point(i, elevations[i]) // Old way
@@ -32,11 +45,13 @@ function draw() {
   vertex(-5, canvasH + 5)
   endShape(FILL)
 
+  bullets.forEach(b => b.move())
+  bullets.forEach(b => b.show())
 
   player.input();
   player.show()
   player.move()
-
+  
 }
 
 class Ball {
@@ -45,14 +60,13 @@ class Ball {
     this.y = 0;
     this.v = 0;
     this.f = 0;
-    this.dxL = 0;
-    this.dxR = 0;
+    this.dy = 0;
+    this.dx = 1;
     this.r = 20
     this.heights = []
     for (let i = -this.r; i <= this.r; i++){
       this.heights.push(sqrt(this.r**2 - i**2))
     }
-    console.log(this.heights)
     this.angle = 0
   }
 
@@ -82,10 +96,9 @@ class Ball {
     //debug circle
     //push(); fill(0); circle(minTouchX, minTouchY, 5); pop();
 
-    this.dxR = elevations[playerPos + 1]
-    this.dxL = elevations[playerPos - 1]
+    this.dy = elevations[playerPos + this.dx] - elevations[playerPos - this.dx]
     
-    this.f += (this.dxR - this.dxL) / 20
+    this.f += this.dy / 20
     this.v += this.f
     this.v *= 1 - playerDrag
 
@@ -111,9 +124,42 @@ class Ball {
       rect(0,0,this.r)
       fill(0)
     pop()
-    rect(this.x, this.y-13, 5, 25)
-    circle(this.x, this.y, this.r /2)
+    // canon
+    rect(this.x, this.y-13, 10, 25)
+    circle(this.x, this.y, this.r * .6)
     
     //triangle(this.x, this.y, this.x - 5, this.y - 10, this.x + 5, this.y - 10)
+  }
+}
+
+class Bullet {
+  constructor(x, y, vx, vy) {
+    this.x = x
+    this.y = y
+    this.vx = vx
+    this.vy = vy
+    this.r = 10
+    this.angle = 0
+  }
+  move() {
+    this.angle += this.vy / this.r / 6
+    this.x += this.vx
+    this.y += this.vy
+  }
+  show() {
+    fill(0)
+    rectMode(CENTER)
+    push()
+    translate(this.x, this.y)
+      rotate(this.angle)
+      rect(0,0,this.r)
+      fill(0)
+    pop()
+  }
+}
+
+function keyPressed() {
+  if (key === "w" || key == "UP_ARROW") {
+    bullets.push(new Bullet(player.x, player.y, player.v, -5))
   }
 }

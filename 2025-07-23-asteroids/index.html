@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroids Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+               background: radial-gradient(at -20px -20px, #e2d600, #9d9d9d, #673c8a, #000000);
+        
+            overflow: hidden;
+            color: #fff;
+        }
+        
+
+        
+        canvas {
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div id="game-canvas"></div>
+        <div class="stars" id="stars"></div>
+    </div>
+    
+    
+    
+    <script>
+    </script>
+    <script src="p5.min.js" defer></script>
+    <script src="asteroids.js" defer></script>
+</body>
+</html>
