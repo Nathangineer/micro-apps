@@ -40,7 +40,7 @@ class Button {
     noStroke()
     movable ? fill(0) : fill(64)
     textAlign(CENTER, CENTER)
-    textSize(35)
+    textSize(30)
     text(this.name, this.x + this.w/2, this.y + this.h/2+1)
   }
 }
@@ -103,12 +103,12 @@ function drawDisks() {
 function createButtons() {
     const container = select('#button-container')
     const directions = [
-        {from: 0, to: 2, name:`🠜`},
-        {from: 0, to: 1, name:`🠞`},
-        {from: 1, to: 0, name:`🠜`},
-        {from: 1, to: 2, name:`🠞`},
-        {from: 2, to: 1, name:`🠜`},
-        {from: 2, to: 0, name:`🠞`}
+        {from: 0, to: 2, name:`◄`},
+        {from: 0, to: 1, name:`►`},
+        {from: 1, to: 0, name:`◄`},
+        {from: 1, to: 2, name:`►`},
+        {from: 2, to: 1, name:`◄`},
+        {from: 2, to: 0, name:`►`}
     ]
 
     directions.forEach((dir, i) => { //(name, x, y, w, h, callback)

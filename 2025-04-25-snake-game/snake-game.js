@@ -77,8 +77,9 @@ function setup() {
 
 function draw() {
   if (gameState.clickToStart == true) {
-    textSize(canvasH/10); textAlign(CENTER); 
-    text("CLICK TO PLAY", canvasW/2, canvasH/2)
+    textSize(canvasH/2); textAlign(CENTER); fill(255, 50)
+    text("▶", canvasW/2, canvasH/2)
+    noLoop()
   } 
   if (gameState.gamePlaying == true) {
     distance += deltaTime / 1000 * speed // fix this so it resets
@@ -108,6 +109,7 @@ function draw() {
       text("GAME OVER", canvasW/2, canvasH/2) 
     }
     // update hi-score and announce if new score achieved 
+    noLoop()
   }
 }
 
@@ -273,12 +275,14 @@ function interactionStart(){
   if (gameState.clickToStart == true) {
     gameState.clickToStart = false
     gameState.gamePlaying = true
+    loop()
   } 
   if (gameState.gameOver == true) {
     gameState.gameOver = false
     console.log("reset")
     resetGame()
-    gameState.gamePlaying = true    
+    gameState.gamePlaying = true   
+    loop() 
   }
   snake.f = rocketForce  
   

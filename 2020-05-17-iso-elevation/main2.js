@@ -1,8 +1,8 @@
-const WIDTH = 800;
-const HEIGHT = 600;
+const WIDTH = 300;
+const HEIGHT = 300;
 
-const tileW = 40;
-const tileH = 20
+const tileW = 15;
+const tileH = 7
 const gridSize = 20
 
 //  1 __ 2      1 
@@ -19,7 +19,6 @@ function setup() {
   for (let i = 0; i < gridSize; i++) {
     tileArr.push([])
     for (let j = 0; j < gridSize; j++) {
-      let k = millis() /1000;
       tileArr[i].push(0)
     }
   }
@@ -29,8 +28,8 @@ function draw() {
   background(120, 120, 190);
   for (let i = 0; i < tileArr.length; i++) {
     for (let j = 0; j < tileArr[0].length; j++) {
-      let k = millis() /12000;
-      tileArr[j][i] = int(noise(j/15, i/15, k)*400)
+      let k = millis() / 6000;
+      tileArr[j][i] = noise(j / 100, i / 100, k) * 250
     }
   }
   tileMap = subSquares(tileArr);
@@ -64,18 +63,19 @@ function subSquares(tileMap) {
 
 function renderTile(tile, xPos, yPos) {
   //transform points
-  let tilePosX = 20 + (tileW/2) * xPos + tileW * yPos / 2;
-  let tilePosY = 120 + tileH * yPos/2 - (tileH/2) * xPos;
+  let tilePosX = (tileW/2) * xPos + tileW * yPos / 2;
+  let tilePosY = tileH * yPos/2 - (tileH/2) * xPos;
 
   let p4 = tile[0]
   let p3 = tile[1]
   let p2 = tile[2]
   let p1 = tile[3]
 
+  // shade based on slope direction
   fill(
-    sin((p1-p2)/30)*255+50, 
-    sin((p2-p3)/30)*255+50, 
-    sin((p3-p4)/30)*255+50
+    ((p1-p2)/30)*205+50,
+    ((p2-p3)/30)*205+50, 
+    ((p3-p4)/30)*205+50
   )
 
   beginShape();

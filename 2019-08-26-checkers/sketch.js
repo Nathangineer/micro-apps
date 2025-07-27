@@ -11,9 +11,9 @@
 
 
 class Tile {
-  constructor (x, y, color) {
-		this.x = x;
-		this.y = y;
+  constructor (row, col, color) {
+		this.x = row;
+		this.y = col;
 		this.piece = color; //'red' or 'black' or 'empty'
 		this.king = false;
 	}
@@ -37,57 +37,56 @@ class Tile {
 }
 
 class Board {
-	constructor (tileSize) {
-	  this.tileSize = tileSize
-		this.board = [
-			[0,1,0,1,0,1,0,1],
-			[1,0,1,0,1,0,1,0],
-			[0,1,0,1,0,1,0,1],
-			[0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0],
-			[2,0,2,0,2,0,2,0],
-			[0,2,0,2,0,2,0,2],
-			[2,0,2,0,2,0,2,0],
-		];
-		for (let i = 0; i < 8; i++){
-			for (let j = 0; j < 8; j++){
-			  if (this.board[i][j] === 1){
-					this.board[i][j] = new Tile(i, j, 'red');
-				}
-				else if (this.board[i][j] === 2){
-					this.board[i][j] = new Tile(i, j, 'black');
-				}
-				else {
-					this.board[i][j] = new Tile(i, j, 'empty');
-				}
-			}
-		}
-
-	}
-	
-	draw() {
-		// Draw the background
-		let white = false;
-		noStroke();
-		for (let i = 0; i < 8; i++){
-			for (let j = 0; j < 8; j++){
-				if (white){ 
-					fill(100,150,150);
-					white = !white;
-				}
-				else {
-					fill(255);
-					white = !white;
-				}
-				rect(
-					i*this.tileSize, j*this.tileSize, 
-					this.tileSize, this.tileSize
-				);
-				this.board[i][j].draw(this.tileSize);
-			}
-			white = !white;
-		}
-	}
+    constructor (tileSize) {
+        this.tileSize = tileSize
+        this.board = [
+            [0,1,0,1,0,1,0,1],
+            [1,0,1,0,1,0,1,0],
+            [0,1,0,1,0,1,0,1],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [2,0,2,0,2,0,2,0],
+            [0,2,0,2,0,2,0,2],
+            [2,0,2,0,2,0,2,0],
+        ];
+        for (let row = 0; row < 8; row++){
+            for (let col = 0; col < 8; col++){
+                if (this.board[row][col] === 1){
+                    this.board[row][col] = new Tile(col, row, 'red');
+                }
+                else if (this.board[row][col] === 2){
+                    this.board[row][col] = new Tile(col, row, 'black');
+                }
+                else {
+                    this.board[row][col] = new Tile(col, row, 'empty');
+                }
+            }
+        }
+    }
+    
+    draw() {
+        // Draw the background
+        let white = false;
+        noStroke();
+        for (let row = 0; row < 8; row++){
+            for (let col = 0; col < 8; col++){
+                if (white){ 
+                    fill(100,150,150);
+                    white = !white;
+                }
+                else {
+                    fill(255);
+                    white = !white;
+                }
+                rect(
+                    col*this.tileSize, row*this.tileSize,
+                    this.tileSize, this.tileSize
+                );
+                this.board[row][col].draw(this.tileSize);
+            }
+            white = !white;
+        }
+    }
 }
 
 // Begin drawing code
@@ -96,12 +95,13 @@ let board;
 let gameState = 0;
 
 function setup() {
-	createCanvas(500, 500);
-	board = new Board(30);
+	createCanvas(300, 300);
+	board = new Board(width/8);
 }
 
 function draw() {
 	board.draw();
+	noLoop()
 }
 
 function mousePressed(){

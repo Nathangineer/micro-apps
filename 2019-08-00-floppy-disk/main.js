@@ -131,8 +131,7 @@ function draw() {
         noLoop()
     }      
 }
-
-function keyPressed() {
+function input() {
     if (gameState === "START") {
         gameState = "PLAYING"
         reset()
@@ -145,6 +144,12 @@ function keyPressed() {
     else if (gameState === "GAME OVER") {
         reset()
     }
+}
+function keyPressed() {
+    input()
+}
+function mousePressed() {
+    input()
 }
 
 function reset() {
