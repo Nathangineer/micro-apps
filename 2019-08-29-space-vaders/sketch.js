@@ -201,6 +201,11 @@ function draw() {
 	image(bg, 0, 0);
 
     if (gameState === "START") {
+		for (let i = 0; i < aliens.length; i++) {
+			aliens[i].draw()
+		}
+		
+		ship.draw();
 		push()
 			textSize(100)
 			fill(255, 50); stroke(128, 180);
