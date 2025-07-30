@@ -77,8 +77,9 @@ function setup() {
 
 function draw() {
   if (gameState.clickToStart == true) {
-    textSize(canvasH/2); textAlign(CENTER); fill(255, 50)
+    textSize(canvasH/3); textAlign(CENTER); fill(0, 100); strokeWeight(5); stroke(255, 50)
     text("▶", canvasW/2, canvasH/2)
+    noStroke()
     noLoop()
   } 
   if (gameState.gamePlaying == true) {

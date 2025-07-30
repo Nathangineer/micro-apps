@@ -1,285 +1,333 @@
-// 0 Floor
-// 1 Wall
-// 2 Key
-// 3 Door
-// S Player start
+// Tile types
+const TILE = {
+  PLAYER: 'S',
+  FLOOR: '.',
+  WALL: '1',
+  RED_KEY: 'r',
+  RED_DOOR: 'R',
+  BLUE_KEY: 'b',
+  BLUE_DOOR: 'B',
+  PUSH_BLOCK: 'P',
+  GOAL: 'G',
+};
+
+const PLAYER_COLOR = "#d3d"
+const FLOOR_COLOR = "#222"
+const WALL_COLOR = "#966"
+const RED_COLOR = "#F44"
+const BLUE_COLOR = "#44F"
+const PUSH_BLOCK_COLOR = "#FA3"
+const GOAL_COLOR = "#FFF"
+
 const GAME_MAP = [
   "111111111111",
-  "110000002001",
-  "110111111111",
-  "100103030001",
-  "101111111101",
-  "101010001001",
-  "101010101011",
-  "101000001001",
-  "101010000001",
-  "101010P00P01",
-  "100000000001",
+  "1........BG1",
+  "1.P.1P11P111",
+  "1PPP1b.R...1",
+  "1.11111111.1",
+  "1.1...r.1..1",
+  "1.P.1P..1.11",
+  "1.1.PPPP1..1",
+  "1.P.1.P....1",
+  "1.1.1.....11",
+  "1...1..1S111",
   "111111111111"
 ];
+
 const TILE_SIZE = 25;
 
-
-class Player {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.inventory = [];
-  }
-  pos() {
-    return [this.x, this.y];
-  }
-  move(x, y) {
-    this.x += x;
-    this.y += y;
-  }
-  grabItem(item) {
-    this.inventory.push(item);
-  }
-  hasItem(item) {
-    return this.inventory.includes(item);
-  }
-  show() {
-    fill(100, 100, 255);
-    rect(this.x * TILE_SIZE + 5, this.y * TILE_SIZE + 5, TILE_SIZE - 10, TILE_SIZE - 10);
-  }
+function drawBlank(x, y) {
+    fill(FLOOR_COLOR);
+    rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 }
 
-
+// Tile Classes
 class Tile {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.visible = true;
   }
-  show(x, y) {}
-  update() {}
-  pushAgainst() {}
-  standOn() {}
-}
 
-
-class Floor extends Tile {
-  constructor(x, y) {
-    super(x, y);
-    this.color = 40;
-  }
-  show(x, y) {
-    fill(this.color);
-    rect(x * TILE_SIZE,
-      y * TILE_SIZE,
-      TILE_SIZE,
-      TILE_SIZE);
-  }
-  pushAgainst(tile, direction) {
-    return true; // Always move into empty floor tile.
-  }
-}
-
-
-class Wall extends Tile {
-  constructor(x, y) {
-    super(x, y);
-    this.color = 200;
-  }
-  show(x, y) {
-    fill(this.color);
-    rect(x * TILE_SIZE,
-      y * TILE_SIZE,
-      TILE_SIZE,
-      TILE_SIZE);
-  }
-  pushAgainst(tile, direction) {
-    return false; // Never move through walls
-  }
-}
-
-
-class Door extends Tile {
-  constructor(x, y) {
-    super(x, y);
-    this.color = color(0, 150, 150);
-    this.isOpen = false;
-  }
-  show(x, y) {
-    if (this.isOpen == false) {
-      fill(this.color);
-      rect(x * TILE_SIZE,
-        y * TILE_SIZE,
-        TILE_SIZE,
-        TILE_SIZE);
-    }
-  }
-  pushAgainst(tile, direction) {
-    if (this.isOpen) {
-      return true;
-    } else if (player.hasItem("Key")) {
-      this.isOpen = true;
-      return false;
-    }
+  canEnter(player, moveDir) {
     return false;
   }
+
+  onEnter(player) {}
+
+  draw() {
+    drawBlank(this.x, this.y)
+  }
 }
 
-
-class Key extends Tile {
-  constructor(x, y) {
-    super(x, y);
-    this.color = color(245, 239, 66);
-    this.isObtained = false;
-  }
-  show(x, y) {
-    if (this.isObtained == false) {
-      fill(this.color);
-      rect(x * TILE_SIZE + 10,
-        y * TILE_SIZE + 10,
-        TILE_SIZE - 20,
-        TILE_SIZE - 20);
-    }
-  }
-  pushAgainst() {
-    this.isObtained = true;
-    if (!player.hasItem("Key")) {
-      player.grabItem("Key");
-    }
+class Floor extends Tile {
+  canEnter() {
     return true;
   }
 }
 
+class Wall extends Tile {
+  draw() {
+    fill(WALL_COLOR);
+    rect(this.x * TILE_SIZE, this.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+  }
+}
+
+class Door extends Tile {
+  constructor(x, y, color) {
+    super(x, y);
+    this.color = color;
+    this.isOpen = false;
+  }
+
+  canEnter(player, moveDir) {
+    if (this.isOpen) return true;
+    if (player.hasItem(this.color + 'Key')) {
+      this.isOpen = true;
+      return true;
+    }
+    return false;
+  }
+
+  draw() {
+    drawBlank(this.x, this.y)
+    if (!this.isOpen) {
+      if (this.color === 'red') fill(RED_COLOR) 
+      else if (this.color === 'blue') fill(BLUE_COLOR) 
+      else fill(255 * (frameCount % 2)) // for error color
+      rect(this.x * TILE_SIZE, this.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      fill(FLOOR_COLOR);
+      rect(this.x * TILE_SIZE + 8, this.y * TILE_SIZE + 8, 
+           TILE_SIZE - 16, TILE_SIZE - 16);
+    }
+  }
+}
+
+class Key extends Tile {
+  constructor(x, y, color) {
+    super(x, y);
+    this.color = color;
+    this.collected = false;
+  }
+
+  canEnter() {
+    return true;
+  }
+
+  onEnter(player) {
+    if (!this.collected) {
+      player.addItem(this.color + 'Key');
+      this.collected = true;
+    }
+  }
+
+  draw() {
+    drawBlank(this.x, this.y)
+    if (!this.collected) {
+      if (this.color === 'red') fill(RED_COLOR) 
+      else if (this.color === 'blue') fill(BLUE_COLOR) 
+      else fill(255 * (frameCount % 2)) // for error color
+      rect(this.x * TILE_SIZE + 8, this.y * TILE_SIZE + 8, 
+           TILE_SIZE - 16, TILE_SIZE - 16);
+    }
+  }
+}
+
+class Goal extends Tile {
+  constructor(x, y, color) {
+    super(x, y);
+  }
+
+  canEnter() {
+    return true;
+  }
+
+  onEnter(player) {
+      // win level
+  }
+
+  draw() {
+    drawBlank(this.x, this.y)
+    push()
+        rectMode(CORNER)
+        noStroke()
+        translate(this.x * TILE_SIZE, this.y * TILE_SIZE)
+        let counter = 0
+        for (let i = 0; i < 5; i++){
+            for (let j = 0; j < 5; j++){
+                fill(counter % 2 * 255)
+                push()
+                translate(i * TILE_SIZE / 5, j * TILE_SIZE / 5)
+                rect(0, 0, TILE_SIZE / 5, TILE_SIZE / 5)
+                pop()
+                counter++
+            }    
+        }
+      fill("") 
+      rect(this.x * TILE_SIZE + 8, this.y * TILE_SIZE + 8, 
+           TILE_SIZE - 16, TILE_SIZE - 16);
+    pop()
+  }
+}
 
 class PushBlock extends Tile {
   constructor(x, y) {
     super(x, y);
-    this.color = color(255, 150, 100);
   }
-  show(x, y) {
-      fill(this.color);
-      rect(x * TILE_SIZE + 10,
-        y * TILE_SIZE + 10,
-        TILE_SIZE - 20,
-        TILE_SIZE - 20);
-  }
-  pushAgainst(moveDir) {
-    let nextTile = createVector(this.x + moveDir.x, this.y + moveDir.y);
-	let isMovable = game_map.pushAgainst(nextTile, moveDir);
-	console.log(nextTile)
-	if (isMovable) {
-	  game_map.swapTiles({x:this.x,y:this.y},nextTile)
-      this.x += moveDir.x;
-	  this.y += moveDir.y;
-	  return true;
+
+  canEnter(player, moveDir) {
+    const newX = this.x + moveDir.x;
+    const newY = this.y + moveDir.y;
+    
+    if (newX < 0 || newX >= game.tiles[0].length || 
+        newY < 0 || newY >= game.tiles.length) {
+      return false;
+    }
+
+    const nextTile = game.tiles[newY][newX];
+    if (nextTile.canEnter(player, moveDir)) {
+      game.tiles[newY][newX] = this;
+      game.tiles[this.y][this.x] = new Floor(this.x, this.y);
+      this.x = newX;
+      this.y = newY;
+      return true;
     }
     return false;
   }
+
+  draw() {
+    drawBlank(this.x, this.y)
+    fill(PUSH_BLOCK_COLOR);
+    rect(this.x * TILE_SIZE + 3, this.y * TILE_SIZE + 3, 
+         TILE_SIZE - 6, TILE_SIZE - 6, 2);
+  }
 }
 
+// Player Class
+class Player {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.inventory = new Set();
+  }
 
-class Game_Map {
+  move(dx, dy) {
+    this.x += dx;
+    this.y += dy;
+  }
+
+  addItem(item) {
+    this.inventory.add(item);
+  }
+
+  hasItem(item) {
+    return this.inventory.has(item);
+  }
+
+  draw() {
+    push()
+    fill(PLAYER_COLOR);
+    noStroke()
+    translate(this.x * TILE_SIZE, this.y * TILE_SIZE)
+    rect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4, 4);
+    fill(255); circle(TILE_SIZE*.35, 4, 12)
+    fill(255); circle(TILE_SIZE*.65, 9, 12)
+    fill(0);   circle(TILE_SIZE*.35, 4, 5 )
+    fill(0);   circle(TILE_SIZE*.65, 9, 5 )
+    pop()
+  }
+}
+
+// Game Class
+class Game {
   constructor() {
-    //this.tile_array;
+    this.tiles = [];
+    this.player = null;
+    this.setup();
   }
-  set(tile_array) {
-    this.tile_array = tile_array;
-  }
-  load_map(map_data){
-	  
-  }
-  update() {
-    //for each tile, run tile.update() 
-  }
-  pushAgainst(tile, direction) {
-	console.log(this.tile_array[tile.y][tile.x].pushAgainst(direction));
-    return this.tile_array[tile.y][tile.x].pushAgainst(direction);
-  }
-  swapTiles(t1, t2){
-	  let tempTile = this.tile_array[t1.y][t1.x];
-	  this.tile_array[t1.y][t1.x] = this.tile_array[t2.y][t2.x];
-	  this.tile_array[t2.y][t2.x] = tempTile;
-  }
-  show() {
-    for (let i = 0; i < this.tile_array[0].length; i++) {
-      for (let j = 0; j < this.tile_array.length; j++) {
-        this.tile_array[j][i].show(j, i);
+
+  setup() {
+    for (let y = 0; y < GAME_MAP.length; y++) {
+      this.tiles[y] = [];
+      for (let x = 0; x < GAME_MAP[y].length; x++) {
+        const char = GAME_MAP[y][x];
+        this.tiles[y][x] = this.createTile(char, x, y);
+        
+        if (char === TILE.PLAYER) {
+          this.player = new Player(x, y);
+          this.tiles[y][x] = new Floor(x, y);
+        }
       }
     }
   }
+
+  createTile(char, x, y) {
+    switch (char) {
+      case TILE.WALL: return new Wall(x, y);
+      case TILE.RED_KEY: return new Key(x, y, 'red');
+      case TILE.BLUE_KEY: return new Key(x, y, 'blue');
+      case TILE.RED_DOOR: return new Door(x, y, 'red');
+      case TILE.BLUE_DOOR: return new Door(x, y, 'blue');
+      case TILE.PUSH_BLOCK: return new PushBlock(x, y);
+      case TILE.GOAL: return new Goal(x, y);
+      default: return new Floor(x, y);
+    }
+  }
+
+  canMoveTo(x, y, moveDir) {
+    if (x < 0 || x >= this.tiles[0].length || y < 0 || y >= this.tiles.length) {
+      return false;
+    }
+    return this.tiles[y][x].canEnter(this.player, moveDir);
+  }
+
+  movePlayer(dx, dy) {
+    const newX = this.player.x + dx;
+    const newY = this.player.y + dy;
+    const moveDir = { x: dx, y: dy };
+
+    if (this.canMoveTo(newX, newY, moveDir)) {
+      this.tiles[newY][newX].onEnter(this.player);
+      this.player.move(dx, dy);
+      return true;
+    }
+    return false;
+  }
+
+  draw() {
+    for (let y = 0; y < this.tiles.length; y++) {
+      for (let x = 0; x < this.tiles[y].length; x++) {
+        this.tiles[y][x].draw();
+      }
+    }
+    this.player.draw();
+  }
 }
 
-
-let game_map = new Game_Map();
-let player = new Player(10, 10);
+// Main sketch
+let game;
 
 function setup() {
   createCanvas(300, 300);
-
-  // Load Map function
-  let temp_map = [];
-  for (let x = 0; x < GAME_MAP[0].length; x++) {
-    temp_map.push([]);
-    for (let y = 0; y < GAME_MAP.length; y++) {
-      switch (GAME_MAP[y][x]) {
-        case '0':
-          temp_map[x].push(new Floor(x, y));
-          break;
-        case '1':
-          temp_map[x].push(new Wall(x, y));
-          break;
-        case '2':
-          temp_map[x].push(new Key(x, y));
-          break;
-        case '3':
-          temp_map[x].push(new Door(x, y));
-          break;
-        case 'P':
-          temp_map[x].push(new PushBlock(x, y));
-          break;
-        default:
-          temp_map[x].push(new Floor(x, y));
-          break;
-      }
-    }
-  }
-  game_map.set(temp_map)
-
+  game = new Game();
 }
 
 function draw() {
   background(0);
-  game_map.show();
-  player.show();
-  noLoop()
+  game.draw();
 }
 
-
 function keyPressed() {
-  let moveDir = {x : 0, y : 0}
-
+  let dx = 0, dy = 0;
+  
   switch (keyCode) {
-    case LEFT_ARROW:
-      moveDir.x = -1;
-      break;
-    case RIGHT_ARROW:
-      moveDir.x = 1;
-      break;
-    case UP_ARROW:
-      moveDir.y = -1;
-      break;
-    case DOWN_ARROW:
-      moveDir.y = 1;
-      break;
+    case LEFT_ARROW: dx = -1; break;
+    case RIGHT_ARROW: dx = 1; break;
+    case UP_ARROW: dy = -1; break;
+    case DOWN_ARROW: dy = 1; break;
   }
 
-  let standTile = createVector(player.y, player.x);
-  let pushedTile = createVector(player.y + moveDir.y, player.x + moveDir.x)
-
-  //game_map.standOn(standTile);
-  let isMovable = game_map.pushAgainst(pushedTile, moveDir);
-
-  if (isMovable) {
-    if (player.x + moveDir.x >= 0 && player.x + moveDir.x < GAME_MAP[0].length &&
-        player.y + moveDir.y >= 0 && player.y + moveDir.y < GAME_MAP.length) {
-        player.move(moveDir.x, moveDir.y);
-    }
+  if (dx !== 0 || dy !== 0) {
+    game.movePlayer(dx, dy);
+    redraw();
   }
-  redraw()
 }
