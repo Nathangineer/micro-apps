@@ -8,17 +8,18 @@
 
 
 let totalPlayers = 2
-let playerTokens = ["❤︎", "💀", "♞", "♜", "🐜"]
+let playerTokens = ["🍬", "🍭", "🍫", "♜", "🐜"]
 
 let canvasW = 300
 let canvasH = 300
 let pointIndexCounter = 0
 let springTension = .8 // Force per pixel from springLength
 let springLength = 15
-let drag = .85
-let repel = 2000
-let pointNum = 100
-const margin = 20
+let drag = .98
+let repel = 4000
+let pointMass = 10
+let pointNum = 80
+const margin = 35
 const tileSize = 15
 let gameState = { clickToStart: true,
                   playerRoll: false,
@@ -40,7 +41,7 @@ function pointObject() {
   this.ay = 0
   this.fx = 0
   this.fy = 0
-  this.mass = 1
+  this.mass = pointMass
   this.color = ""
 }
 
@@ -49,40 +50,38 @@ let points = new Array(pointNum+1)
 function setup() {
   createPoints()
   createCanvas(canvasW, canvasH);
-  textAlign(CENTER, CENTER)
   textStyle(BOLD)
   textSize(canvasH/15)
 }
 
 function draw() {
-  fillGradient('conic', {
-    from : [canvasW/2, canvasH/2, 315], // x, y, angle(degrees)
+  fillGradient('radial', {
+    from : [canvasW/2, canvasH/2, 900, 0], // x, y, angle(degrees)
     steps : [[color(152, 107, 54), 0],
-             [color(152, 107, 54), .001],
              [color(152, 107, 54), .25],
-             [color(198, 151, 98), .26],
              [color(198, 151, 98), .5],
-             [color(243, 194, 140), .51],
-             [color(243, 194, 140), .75],
-             [color(198, 151, 98), .76],
-             [color(198, 151, 98), .99],          
-             [color(152, 107, 54), 1]]}
+             [color(243, 194, 140), .75],     
+             [color(52, 17, 54), 1]]}
     )
   
   rect(-5, -5, canvasW+10, canvasH+10)
 
   movePoints()
+  // draw start and goal
+  fill("#fff"); noStroke()
+  circle(margin, canvasH - margin, 30)
+  circle(canvasW / 2, canvasH /2, 30)
   drawPoints()
 
   if (gameState.clickToStart == true) {message = "Click to start"} 
   if (gameState.clickToStart == false) {
     if (gameState.playerRoll == true) {
       drawPlayers()
-      message = `🎲 Player ${currentPlayer+1} Roll 🎲`
+      message = `${playerTokens[currentPlayer]} Roll`
     }
     if (gameState.playerDone == true) {
       drawPlayers()
-      message = `(Player ${currentPlayer+1} Moves ${diceRoll} Space${diceRoll == 1 ? "" : "s"})`
+      message = `${playerTokens[currentPlayer]} Moves ${diceRoll} Space${diceRoll == 1 ? "" : "s"}`
     }
     if (gameState.gameOver == true) {
       message = `${currentPlayer+1} wins!`
@@ -90,7 +89,10 @@ function draw() {
   }
   
   // Display message
-  stroke(255); fill(0); text(message, canvasW/2, margin)
+  stroke(255); fill(0); 
+  textAlign(CENTER, TOP); textSize(25)
+  strokeWeight(2)
+  text(message, canvasW/2, 0)
 }
 
 
@@ -102,11 +104,7 @@ function drawPlayers() {
     let pieceY = points[players[i]].y
 
     fill(255)
-    textSize(25)
-    text(playerTokens[i], pieceX, pieceY)
-    
-    fill(0)
-    textSize(20)
+    textSize(25); textAlign(CENTER, CENTER)
     text(playerTokens[i], pieceX, pieceY)
   }
 }
@@ -181,7 +179,7 @@ function movePoints() {
 function drawPoints() {
   noFill()
   stroke(177)
-  strokeWeight(20)
+  strokeWeight(tileSize*1.5)
   beginShape()
   curveVertex(points[0].x, points[0].y)
   for (let i = 0; i < points.length; i++) {
@@ -204,13 +202,15 @@ function drawPoints() {
   noStroke(); strokeWeight(2)
   for (let i = 0; i < points.length; i++) {
     let pct = i / points.length
-    fill(0,0,0,160)
+    fill(0,160)
     circle(points[i].x, points[i].y, tileSize*1.125)
-    fill(0,0,0,60)
+    fill(0,160)
     circle(points[i].x, points[i].y, tileSize*1.3)
-    fill(sin(pct*30*PI)*100+155, sin(pct*20*PI)*100+155, sin(pct*50*PI)*100+155, 255)
+    colorMode(HSB)
+    fill(pct*360, 100, 100)
     circle(points[i].x, points[i].y, tileSize)
-    fill(0,0,0,80)
+    colorMode(RGB)
+    fill(0,80)
     circle(points[i].x, points[i].y, tileSize*.85)
   }
 }

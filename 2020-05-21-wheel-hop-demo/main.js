@@ -2,8 +2,8 @@
 
 'use strict'
 
-const WIDTH = 600;
-const HEIGHT = 600;
+const WIDTH = 300;
+const HEIGHT = 300;
 const GRAVITY = .2;
 
 let ball1, ball2;
@@ -12,9 +12,9 @@ let ground;
 
 function setup() {
   createCanvas(WIDTH, HEIGHT);
-  ball1 = new Ball(200, 300, 5)
-  ball2 = new Ball(200, 100, 5)
-  spring = new Spring(200, .05)
+  ball1 = new Ball(100, 200, 5)
+  ball2 = new Ball(100, 100, 5)
+  spring = new Spring(100, .05)
   ground = new Ground(200, 3)
   console.log(ground.heightMap)
 }
@@ -81,7 +81,7 @@ class Spring {
     let distance = dist(p1.x, p1.y, p2.x, p2.y)
     let displacement = this.l - distance
 
-    let friction = .1 * (displacement - this.oldDisplacement)
+    let friction = .05 * (displacement - this.oldDisplacement)
     this.oldDisplacement = displacement
 
     this.force = this.k * displacement + friction
@@ -143,7 +143,8 @@ class Ball {
   }
 
   draw() {
-    ellipse(this.p.x, this.p.y, 50)
+    strokeWeight(5)
+    circle(this.p.x, this.p.y, 30)
   }
 
 

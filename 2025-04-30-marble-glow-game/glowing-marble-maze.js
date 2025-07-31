@@ -10,15 +10,15 @@
 /*! p5.fillgradient v0.1.2 (c) 2024 Jorge Moreno, @alterebro */
 "use strict";p5.prototype.fillGradient=function(){let o=0<arguments.length&&void 0!==arguments[0]?arguments[0]:"linear";var t=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{};let r=2<arguments.length&&void 0!==arguments[2]&&arguments[2];var e={linear:{from:[0,0],to:[width,height],steps:[color(255),color(0,96,164),color(0)]},radial:{from:[width/2,height/2,0],to:[width/2,height/2,max(width/2,height/2)],steps:[color(255),color(0,96,164),color(0)]},conic:{from:[width/2,height/2,90],steps:[color(255),color(0,96,164),color(0)]}};let a=o.toLowerCase(),i=(a=e[a]?a:"linear",Object.assign(e[a],t)),l=(r?r.canvas:canvas).getContext("2d"),n={linear:()=>l.createLinearGradient(i.from[0],i.from[1],i.to[0],i.to[1]),radial:()=>l.createRadialGradient(i.from[0],i.from[1],i.from[2],i.to[0],i.to[1],i.to[2]),conic:()=>l.createConicGradient(radians(i.from[2]),i.from[0],i.from[1])},c=n[a]();i.steps.forEach((o,t)=>{o=Array.isArray(o)?o:[o],t=o[1]||t/(i.steps.length-1),t=Math.min(1,Math.max(0,t));c.addColorStop(t,o[0])}),l.fillStyle=c};
 
-const WIDTH = 300;
-const HEIGHT = 300;
+const canvasW = 300;
+const canvasH = 300;
 
-const PLAYER_ACCEL = .25
+const PLAYER_ACCEL = .2
 const PLAYER_MAX_SPEED = 2
-const PLAYER_SIZE = 20
+const PLAYER_SIZE = 10
 const PLAYER_COLOR = "#00f"
-const PLAYER_DRAG = .95
-const RAY_RESOLUTION = 5 // This is very low
+const PLAYER_DRAG = .99
+const RAY_ANGLE = 1 // This is very low
 let walls = [];
 let wallCount = 3;
 let particle;
@@ -26,18 +26,18 @@ let player;
 
 
 function setup() {
-	createCanvas(WIDTH, HEIGHT);
+	createCanvas(canvasW, canvasH);
 	
-	player = new Player(101, 101)
+	player = new Player(canvasW/2, PLAYER_SIZE)
   particle = new Particle();
 	for (let i = 0 ; i < wallCount ; i++){
-		walls.push(new Wall(random(WIDTH), random(HEIGHT),
-				            random(WIDTH), random(HEIGHT),));
+		walls.push(new Wall(random(canvasW), random(canvasH - PLAYER_SIZE) + PLAYER_SIZE,
+				            random(canvasW), random(canvasH - PLAYER_SIZE) + PLAYER_SIZE,));
 	}
-	walls.push(new Wall(0, 0, WIDTH, 0));
-	walls.push(new Wall(WIDTH, 0, WIDTH, HEIGHT));
-	walls.push(new Wall(WIDTH, HEIGHT, 0, HEIGHT));
-	walls.push(new Wall(0, HEIGHT, 0, 0));
+	walls.push(new Wall(0, 0, canvasW, 0));
+	walls.push(new Wall(canvasW, 0, canvasW, canvasH));
+	walls.push(new Wall(canvasW, canvasH, 0, canvasH));
+	walls.push(new Wall(0, canvasH, 0, 0));
 }
 
 function draw() {
@@ -59,8 +59,8 @@ function draw() {
   
   pop()
   fill(255, 10, 10)
-  
-  circle(200,200,200)  
+
+  //circle(200,200,200)  
 }
 
 function CircleLineCollision(Point, Radius, LineA, LineB) {
@@ -166,7 +166,6 @@ class Player {
 		noStroke()
     strokeWeight(3)
     fill(PLAYER_COLOR)
-		circle(this.p.x - this.v.x, this.p.y - this.v.y)
     circle(this.p.x, this.p.y, PLAYER_SIZE)
     // DRAW 3D DOTS IN THE MARBLE LIKE MARBLE MADNESS
 	}
@@ -243,7 +242,7 @@ class Wall {
 		stroke(0);
     strokeWeight(3)
 		line(this.a.x, this.a.y, this.b.x, this.b.y);
-    circle(this.a.x, this.a.y, 10)
+    //circle(this.a.x, this.a.y, 10)
 	}
 }
 
@@ -252,7 +251,7 @@ class Particle {
 	constructor(){
 		this.pos = createVector(width / 2, height / 2);
 		this.rays = [];
-		for (let i = 0 ; i < 360 ; i += RAY_RESOLUTION){
+		for (let i = 0 ; i < 360 ; i += RAY_ANGLE){
 			this.rays.push(new Ray(this.pos, radians(i)));
 		}
 	}
@@ -264,7 +263,7 @@ class Particle {
     noStroke()
     fillGradient('radial', {
     from : [player.p.x, player.p.y, 0], // x, y, radius
-    to : [player.p.x, player.p.y, 500], // x, y, radius
+    to : [player.p.x, player.p.y, 200], // x, y, radius
     steps : [
         color(255),
         color(96, 96, 164),
